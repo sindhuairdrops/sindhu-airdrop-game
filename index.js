@@ -139,3 +139,7 @@ bot.on("message", (msg) => {
 });
 
 console.log("Bot fully loaded.");
+// Prevent Node.js from exiting
+console.log("Bot is running and will stay alive...");
+setInterval(() => {}, 1000);
+
