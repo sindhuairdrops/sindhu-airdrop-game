@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database(path.join(__dirname, '..', 'sindhu.db'));
-const path = require('path');
+const path = require('path');  // <-- MUST COME BEFORE USING path
 const fs = require('fs');
+
+// Correct DB file (sindhu.db)
+const db = new sqlite3.Database(path.join(__dirname, '..', 'sindhu.db'));
 
 // Admin password
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Jesh@5999R';
@@ -74,8 +76,9 @@ router.post('/message', auth, express.urlencoded({ extended: true }), (req, res)
 
 // Get message
 router.get('/message', auth, (req, res) => {
-  const msg = fs.existsSync('admin_message.txt') ?
-    fs.readFileSync('admin_message.txt', 'utf8') : '';
+  const msg = fs.existsSync('admin_message.txt')
+    ? fs.readFileSync('admin_message.txt', 'utf8')
+    : '';
   res.send(msg);
 });
 
