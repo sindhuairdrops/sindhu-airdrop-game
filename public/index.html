@@ -1,66 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sindhu Tap Game</title>
-
-    <style>
-        body {
-            margin: 0;
-            background: #000;
-            color: white;
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-
-        #container {
-            padding-top: 20px;
-        }
-
-        #coin {
-            width: 260px;
-            height: 260px;
-            border-radius: 50%;
-            cursor: pointer;
-            user-select: none;
-            transition: transform 0.1s;
-        }
-
-        #coin:active {
-            transform: scale(0.92);
-        }
-
-        #stats {
-            margin-top: 20px;
-            font-size: 22px;
-            line-height: 30px;
-        }
-
-        #announce {
-            color: gold;
-            margin-bottom: 10px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sindhu Airdrop Tap Game</title>
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-    <h3 id="announce">Loading announcements...</h3>
+<div class="container">
 
-    <h1>🔥 Sindhu Tap Game</h1>
+    <h2>🔥 Sindhu Airdrop</h2>
 
-    <div id="container">
-        <img id="coin" src="logo.png" />
+    <div class="coin-counter">
+        <span id="coins">0</span> 🪙
     </div>
 
-    <div id="stats">
-        Taps Today: <span id="taps">0</span><br>
-        Energy: <span id="energy">50</span>
-    </div>
+    <button id="tapButton">
+        <img src="logo.png" class="logo">
+    </button>
 
-    <audio id="tapSound" src="tap.mp3"></audio>
+    <p class="tap-info">Tap the logo to earn coins!</p>
 
-    <script src="webapp.js"></script>
+</div>
+
+<audio id="tapSound" src="tap.mp3"></audio>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="tap.js"></script>
 
 </body>
 </html>
