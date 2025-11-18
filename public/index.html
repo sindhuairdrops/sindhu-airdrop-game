@@ -5,19 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sindhu Airdrop Tap Game</title>
 <link rel="stylesheet" href="style.css">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 
 <body>
 
 <div class="container">
 
-    <h2>🔥 Sindhu Airdrop</h2>
+    <h2 class="title">🔥 Sindhu Airdrop</h2>
 
     <div class="coin-counter">
         <span id="coins">0</span> 🪙
     </div>
 
-    <button id="tapButton">
+    <button id="tapButton" class="pulse">
         <img src="logo.png" class="logo">
     </button>
 
@@ -27,8 +28,6 @@
 
 <audio id="tapSound" src="tap.mp3"></audio>
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="tap.js"></script>
-
 </body>
 </html>
