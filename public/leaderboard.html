@@ -1,42 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sindhu Leaderboard</title>
-
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-<style>
-body {
-    margin: 0;
-    background: #000;
-    color: white;
-    font-family: Arial, sans-serif;
-    padding: 20px;
-}
-h1 { text-align: center; }
-.card {
-    background: #111;
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #333;
-}
-.rank {
-    font-size: 20px;
-    font-weight: bold;
-    color: gold;
-}
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leaderboard</title>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<h1>🏆 Top Players</h1>
-<div id="board">Loading…</div>
+<h2>🏆 Top Players</h2>
 
-<script src="leaderboard.js"></script>
+<div id="board" class="list-box">Loading…</div>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+fetch("/admin/users")
+  .then(r => r.json())
+  .then(rows => {
+    let html = "<ul>";
+    rows.slice(0, 10).forEach((u, i) => {
+      html += `<li>#${i+1} — User ${u.id} — ${u.coins} 🪙</li>`;
+    });
+    html += "</ul>";
+    document.getElementById("board").innerHTML = html;
+  });
+</script>
 
 </body>
 </html>
