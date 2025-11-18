@@ -13,6 +13,9 @@ const path = require("path");
 // ---------------------------------------
 console.log("Loading bot...");
 
+// 🔥 LOAD BOT COMMANDS (.onText, .callback_query, etc.)
+require("./index.js");
+
 const bot = new TelegramBot(process.env.BOT_TOKEN, {
   polling: false
 });
