@@ -7,7 +7,7 @@ const fs = require('fs');
 const db = new sqlite3.Database(path.join(__dirname, "..", "database.sqlite"));
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Jesh@5999R";
 
-// Simple session
+// Simple session store
 const sessions = {};
 
 function getSid(req) {
@@ -19,7 +19,7 @@ function getSid(req) {
 function auth(req, res, next) {
   const sid = getSid(req);
   if (sid && sessions[sid]) return next();
-  return res.redirect("/admin/login");
+  res.redirect("/admin/login");
 }
 
 // Login page
@@ -27,7 +27,7 @@ router.get("/login", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "admin", "login.html"));
 });
 
-// POST login
+// Login POST
 router.post("/login", express.urlencoded({ extended: true }), (req, res) => {
   if (req.body.password === ADMIN_PASSWORD) {
     const sid = Math.random().toString(36).slice(2);
@@ -43,7 +43,7 @@ router.get("/", auth, (req, res) => {
   res.sendFile(path.join(__dirname, "..", "admin", "index.html"));
 });
 
-// Stats API
+// Stats
 router.get("/api/stats", auth, (req, res) => {
   db.get(
     "SELECT COUNT(*) AS users, SUM(coins) AS tokens, SUM(total_referrals) AS referrals FROM users",
@@ -51,7 +51,7 @@ router.get("/api/stats", auth, (req, res) => {
   );
 });
 
-// User list
+// User List
 router.get("/users", auth, (req, res) => {
   db.all(
     "SELECT id, wallet, coins, total_referrals, joined_date FROM users ORDER BY coins DESC",
@@ -65,7 +65,7 @@ router.post("/message", auth, express.urlencoded({ extended: true }), (req, res)
   res.send("OK");
 });
 
-// Get scrolling message
+// Load scrolling message
 router.get("/message", auth, (req, res) => {
   const msg = fs.existsSync("admin_message.txt")
     ? fs.readFileSync("admin_message.txt", "utf8")
@@ -73,12 +73,12 @@ router.get("/message", auth, (req, res) => {
   res.send(msg);
 });
 
-// CSV Download
+// CSV export
 router.get("/report", auth, (req, res) => {
   db.all(
     "SELECT id, wallet, coins, total_referrals, joined_date FROM users",
     (err, rows) => {
-      if (err) return res.status(500).send("Error generating report");
+      if (err) return res.status(500).send("Error");
 
       let csv = "user_id,wallet,coins,total_referrals,joined_date\n";
       rows.forEach(u => {
@@ -91,6 +91,28 @@ router.get("/report", auth, (req, res) => {
       res.send(csv);
     }
   );
+});
+
+// Broadcast Message to ALL Users
+router.post("/broadcast", auth, express.json(), (req, res) => {
+  const message = req.body.message;
+  if (!message) return res.send("❌ Message empty");
+
+  db.all("SELECT id FROM users", async (err, rows) => {
+    if (err) return res.send("Error fetching users");
+
+    let count = 0;
+
+    for (const u of rows) {
+      try {
+        await global.bot.sendMessage(u.id, message);
+        count++;
+        await new Promise(r => setTimeout(r, 40)); // Flood control
+      } catch (e) {}
+    }
+
+    res.send(`✅ Message sent to ${count} users`);
+  });
 });
 
 module.exports = router;
