@@ -1,0 +1,48 @@
+body {
+  background: #0d0d0d;
+  color: white;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+.container {
+  margin-top: 40px;
+}
+
+.logo {
+  width: 150px;
+  height: 150px;
+  user-select: none;
+}
+
+#tapButton {
+  background: none;
+  border: none;
+}
+
+.coin-counter {
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+.tap-info {
+  opacity: 0.8;
+  font-size: 14px;
+}
+
+.list-box {
+  background: #1a1a1a;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 20px;
+  text-align: left;
+}
+
+.ref-box {
+  background: #333;
+  color: #00eaff;
+  padding: 10px;
+  border-radius: 8px;
+  word-break: break-all;
+}
