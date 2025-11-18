@@ -1,102 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sindhu Tap Game</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sindhu Tap Game</title>
 
-<style>
-    body {
-        margin:0;
-        padding:0;
-        background:#0e0e0e;
-        color:white;
-        font-family:sans-serif;
-        text-align:center;
-    }
-    #title {
-        font-size:26px;
-        margin-top:20px;
-        font-weight:700;
-    }
-    #scrollMsg {
-        background:#111;
-        padding:8px;
-        font-size:14px;
-        color:#ffde59;
-        white-space: nowrap;
-        overflow:hidden;
-        box-shadow:0 0 10px rgba(255,255,255,0.1);
-    }
-    #coin {
-        width: 200px;
-        margin-top:40px;
-        transition:0.1s;
-    }
-    .tapEffect {
-        animation: tap 0.1s ease;
-    }
-    @keyframes tap {
-        0% { transform: scale(1); }
-        50% { transform: scale(0.9); }
-        100% { transform: scale(1); }
-    }
-    #counter {
-        font-size:20px;
-        margin-top:20px;
-    }
-</style>
+    <style>
+        body {
+            margin: 0;
+            background: #000;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        #container {
+            padding-top: 20px;
+        }
+
+        #coin {
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.1s;
+        }
+
+        #coin:active {
+            transform: scale(0.92);
+        }
+
+        #stats {
+            margin-top: 20px;
+            font-size: 22px;
+            line-height: 30px;
+        }
+
+        #announce {
+            color: gold;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
-
 <body>
 
-<div id="scrollMsg">Loading announcements...</div>
+    <h3 id="announce">Loading announcements...</h3>
 
-<div id="title">🔥 Sindhu Tap Game</div>
+    <h1>🔥 Sindhu Tap Game</h1>
 
-<img id="coin" src="logo.png">
+    <div id="container">
+        <img id="coin" src="logo.png" />
+    </div>
 
-<div id="counter">
-    Taps Today: <span id="taps">0</span><br>
-    Energy: <span id="energy">50</span>
-</div>
+    <div id="stats">
+        Taps Today: <span id="taps">0</span><br>
+        Energy: <span id="energy">50</span>
+    </div>
 
-<audio id="tapSound" src="tap.mp3"></audio>
+    <audio id="tapSound" src="tap.mp3"></audio>
 
-<script>
-const tg = window.Telegram.WebApp;
-tg.expand();
-
-let taps = 0;
-let energy = 50;
-
-// Load scrolling admin message
-fetch("/admin/message")
-  .then(res => res.text())
-  .then(txt => {
-    document.getElementById("scrollMsg").innerHTML = txt || "Welcome to Sindhu Airdrop!";
-});
-
-// Tap event
-const coin = document.getElementById("coin");
-coin.addEventListener("click", () => {
-    if (energy <= 0) return;
-
-    taps++;
-    energy--;
-
-    document.getElementById("taps").innerText = taps;
-    document.getElementById("energy").innerText = energy;
-
-    coin.classList.add("tapEffect");
-    setTimeout(() => coin.classList.remove("tapEffect"), 120);
-
-    document.getElementById("tapSound").play();
-
-    // send taps to telegram
-    tg.sendData(JSON.stringify({ taps }));
-});
-</script>
+    <script src="webapp.js"></script>
 
 </body>
 </html>
