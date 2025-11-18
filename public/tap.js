@@ -1,22 +1,17 @@
-// ------------------------------
-//  Telegram WebApp Initialization
-// ------------------------------
+// --------------------------------------
+// Telegram WebApp API Init
+// --------------------------------------
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// ------------------------------
-//  ELEMENTS
-// ------------------------------
+// Elements
 const tapButton = document.getElementById("tapButton");
 const coinsDisplay = document.getElementById("coins");
 const tapSound = document.getElementById("tapSound");
 
-// ------------------------------
-//  SOUND FIX (Telegram restriction)
-// ------------------------------
+// Telegram sound unlock
 let soundEnabled = false;
 
-// After first click anywhere IN the webapp, sound unlocks
 document.addEventListener("click", () => {
     soundEnabled = true;
 }, { once: true });
@@ -24,24 +19,33 @@ document.addEventListener("click", () => {
 function playSound() {
     if (!soundEnabled) return;
     tapSound.currentTime = 0;
-    tapSound.play().catch(err => {
-        console.log("Sound blocked:", err);
-    });
+    tapSound.play().catch(() => {});
 }
 
-// ------------------------------
-//  TAP LOGIC
-// ------------------------------
 let coins = 0;
+
+// Smooth animation counter
+function animateCoins(newCoins) {
+    let start = coins;
+    let end = newCoins;
+    let duration = 200;
+    let startTime = performance.now();
+
+    function update(time) {
+        let progress = Math.min((time - startTime) / duration, 1);
+        coinsDisplay.textContent = Math.floor(start + (end - start) * progress);
+        if (progress < 1) requestAnimationFrame(update);
+    }
+
+    requestAnimationFrame(update);
+}
 
 tapButton.addEventListener("click", () => {
     coins++;
-    coinsDisplay.textContent = coins;
+    animateCoins(coins);
+    playSound();
 
-    playSound();   // play tap sound AFTER first interaction
+    if (navigator.vibrate) navigator.vibrate(40);
 
-    // Send data to the bot
-    tg.sendData(JSON.stringify({
-        taps: 1
-    }));
+    tg.sendData(JSON.stringify({ taps: 1 }));
 });
