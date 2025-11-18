@@ -2,9 +2,9 @@
 fetch("/admin/api/stats")
     .then(res => res.json())
     .then(data => {
-        document.getElementById("totalUsers").innerText = data.users;
-        document.getElementById("totalEarnings").innerText = data.tokens + " 🪙";
-        document.getElementById("totalRefs").innerText = data.referrals;
+        document.getElementById("totalUsers").innerText = data.users || 0;
+        document.getElementById("totalEarnings").innerText = (data.tokens || 0) + " 🪙";
+        document.getElementById("totalRefs").innerText = data.referrals || 0;
     });
 
 // Load Users
@@ -31,11 +31,11 @@ fetch("/admin/users")
 
 // Search Filter
 function filterUsers() {
-    let input = document.getElementById("searchBox").value.toLowerCase();
+    const input = document.getElementById("searchBox").value.toLowerCase();
     const rows = document.querySelectorAll("#userTable tbody tr");
 
     rows.forEach(r => {
-        let rowText = r.innerText.toLowerCase();
+        const rowText = r.innerText.toLowerCase();
         r.style.display = rowText.includes(input) ? "" : "none";
     });
 }
@@ -53,5 +53,31 @@ function saveMsg() {
 
 // Download CSV
 function downloadCSV() {
-    window.location = "/admin/report";
+    window.location.href = "/admin/report";
+}
+
+// Send message to ALL users
+function sendBroadcast() {
+    const msg = document.getElementById("broadcastBox").value.trim();
+    const status = document.getElementById("broadcastStatus");
+
+    if (!msg) {
+        alert("Message cannot be empty!");
+        return;
+    }
+
+    status.innerText = "Sending...";
+
+    fetch("/admin/broadcast", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg })
+    })
+    .then(res => res.text())
+    .then(response => {
+        status.innerText = response;
+    })
+    .catch(() => {
+        status.innerText = "❌ Error sending messages.";
+    });
 }
