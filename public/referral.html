@@ -1,51 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sindhu Referral</title>
-
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-<style>
-body {
-    margin: 0;
-    background: #000;
-    color: white;
-    font-family: Arial, sans-serif;
-    padding: 20px;
-}
-h1 { text-align: center; }
-.box {
-    background: #111;
-    padding: 20px;
-    border-radius: 12px;
-    text-align: center;
-    border: 1px solid #333;
-}
-button {
-    background: gold;
-    padding: 12px 20px;
-    border: none;
-    margin-top: 10px;
-    border-radius: 10px;
-    font-size: 18px;
-    cursor: pointer;
-}
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Referral</title>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<h1>🎁 Referral</h1>
+<h2>🎁 Referral Reward</h2>
 
-<div class="box">
+<div class="list-box">
     <p>Invite friends and earn <b>500 coins</b> per referral!</p>
-    <input id="ref" style="width:100%;padding:10px;border-radius:10px;" readonly />
-    <button onclick="copyLink()">Copy Link</button>
+    <p>Your link:</p>
+    <div id="linkBox" class="ref-box">Loading…</div>
 </div>
 
-<script src="referral.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+const tg = window.Telegram.WebApp;
+const userId = tg.initDataUnsafe.user?.id;
+
+document.getElementById("linkBox").innerText =
+  `https://t.me/SindhuAirdrop_bot?start=${userId}`;
+</script>
 
 </body>
 </html>
