@@ -1,28 +1,50 @@
-// main.js — single process bot + server
+// main.js — single-process bot + express server
 
 console.log("== STARTING APPLICATION ==");
 
 require("dotenv").config();
 
+const TelegramBot = require("node-telegram-bot-api");
 const express = require("express");
 const path = require("path");
 
 // ---------------------------------------
-// 1. LOAD BOT (index.js handles bot setup)
+// LOAD TELEGRAM BOT
 // ---------------------------------------
 console.log("Loading bot...");
-require("./index.js");   // <-- IMPORTANT FIX
+
+const bot = new TelegramBot(process.env.BOT_TOKEN, {
+  polling: false
+});
+
+global.bot = bot;
+
+// Basic message log (for debug)
+bot.on("message", msg => {
+  console.log("Message received:", msg.text);
+});
 
 // ---------------------------------------
-// 2. START EXPRESS SERVER
+// SET WEBHOOK
 // ---------------------------------------
+const WEBHOOK_URL = process.env.WEBAPP_URL + "/webhook";
+
+bot.setWebHook(WEBHOOK_URL)
+  .then(() => console.log("Webhook set:", WEBHOOK_URL))
+  .catch(err => console.error("Webhook error:", err));
+
+
+// ---------------------------------------
+// EXPRESS SERVER
+// ---------------------------------------
+
 console.log("Starting server...");
-
 const app = express();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Public folder
+// Public folder (webapp)
 app.use(express.static(path.join(__dirname, "public")));
 
 // Admin routes
@@ -31,26 +53,25 @@ try {
   app.use("/admin", adminRoutes);
   console.log("Admin routes loaded.");
 } catch (err) {
-  console.error("Admin route error:", err);
+  console.error("Admin routes error:", err);
 }
 
-// Telegram webhook endpoint
+// Telegram Webhook Receiver
 app.post("/webhook", (req, res) => {
-  if (!global.bot) {
-    console.log("⚠️ Bot missing!");
-    return res.sendStatus(500);
-  }
-
   try {
+    if (!global.bot) {
+      console.log("⚠️ Bot missing!");
+      return res.sendStatus(500);
+    }
     global.bot.processUpdate(req.body);
-    return res.sendStatus(200);
+    res.sendStatus(200);
   } catch (err) {
-    console.error("Webhook ERROR:", err);
-    return res.sendStatus(500);
+    console.error("Webhook error:", err);
+    res.sendStatus(500);
   }
 });
 
-// Health check
+// Health Check
 app.get("/ping", (req, res) => res.send("pong"));
 
 // Render dynamic port
