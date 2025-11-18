@@ -71,27 +71,25 @@ function getUser(id, cb) {
 
 bot.onText(/\/start(.*)?/, async (msg, match) => {
   const userId = msg.from.id;
-  const ref = match[1]?.trim();
+  const ref = match[1]?.replace(" ", "").replace("=", "");
 
-  getUser(userId, () => {
-    // Save referral
-    if (ref && ref !== " " && ref !== "" && ref !== userId.toString()) {
-      db.run(
-        "UPDATE users SET total_referrals = total_referrals + 1 WHERE id=?",
-        [ref]
-      );
+  // Save referral if not the same user
+  if (ref && ref !== "" && ref !== userId.toString()) {
+    db.run(
+      "UPDATE users SET total_referrals = total_referrals + 1 WHERE id=?",
+      [ref]
+    );
+  }
+
+  bot.sendMessage(userId, "🔥 Welcome to Sindhu Airdrop!", {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: "🪙 Press to Earn", web_app: { url: WEBAPP_URL } }],
+        [{ text: "🏆 Leaderboard", web_app: { url: WEBAPP_URL + "/leaderboard.html" } }],
+        [{ text: "🎁 Referral", web_app: { url: WEBAPP_URL + "/referral.html" } }],
+        [{ text: "💰 Wallet", callback_data: "wallet" }]
+      ]
     }
-
-    bot.sendMessage(userId, "🔥 Welcome to Sindhu Airdrop!", {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: "🪙 Press to Earn", web_app: { url: WEBAPP_URL } }],
-          [{ text: "🏆 Leaderboard", callback_data: "leaderboard" }],
-          [{ text: "🎁 Referral", callback_data: "referral" }],
-          [{ text: "💰 Wallet", callback_data: "wallet" }]
-        ]
-      }
-    });
   });
 });
 
@@ -126,27 +124,6 @@ bot.on("web_app_data", (msg) => {
 bot.on("callback_query", (query) => {
   const userId = query.from.id;
   const action = query.data;
-
-  if (action === "leaderboard") {
-    db.all(
-      "SELECT id, coins FROM users ORDER BY coins DESC LIMIT 10",
-      (err, rows) => {
-        let txt = "🏆 Top Players:\n\n";
-        rows.forEach((u, i) => {
-          txt += `${i + 1}. User ${u.id} — ${u.coins} 🪙\n`;
-        });
-
-        bot.sendMessage(userId, txt);
-      }
-    );
-  }
-
-  if (action === "referral") {
-    bot.sendMessage(
-      userId,
-      `👥 Invite and earn:\nhttps://t.me/${process.env.BOT_USERNAME}?start=${userId}`
-    );
-  }
 
   if (action === "wallet") {
     bot.sendMessage(userId, "💳 Send your Polygon (0x...) wallet address");
