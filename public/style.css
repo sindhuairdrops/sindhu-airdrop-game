@@ -1,48 +1,53 @@
 body {
-  background: #0d0d0d;
-  color: white;
-  text-align: center;
-  font-family: Arial, sans-serif;
-  padding: 20px;
+    margin: 0;
+    padding: 0;
+    background: #000;
+    font-family: Arial, sans-serif;
+    color: white;
+    text-align: center;
 }
 
 .container {
-  margin-top: 40px;
+    padding-top: 30px;
 }
 
-.logo {
-  width: 150px;
-  height: 150px;
-  user-select: none;
-}
-
-#tapButton {
-  background: none;
-  border: none;
+.title {
+    font-size: 26px;
+    margin-bottom: 10px;
 }
 
 .coin-counter {
-  font-size: 32px;
-  margin-bottom: 20px;
+    font-size: 34px;
+    margin-bottom: 15px;
+}
+
+.logo {
+    width: 180px;
+    transition: transform 0.15s ease;
+}
+
+#tapButton {
+    background: none;
+    border: none;
+}
+
+#tapButton:active .logo {
+    transform: scale(0.88);
+}
+
+/* Glow animation */
+.pulse {
+    animation: glow 1.5s infinite;
+}
+
+@keyframes glow {
+    0% { filter: drop-shadow(0 0 5px #ffd700); }
+    50% { filter: drop-shadow(0 0 15px #ffae00); }
+    100% { filter: drop-shadow(0 0 5px #ffd700); }
 }
 
 .tap-info {
-  opacity: 0.8;
-  font-size: 14px;
-}
-
-.list-box {
-  background: #1a1a1a;
-  padding: 15px;
-  border-radius: 10px;
-  margin-top: 20px;
-  text-align: left;
-}
-
-.ref-box {
-  background: #333;
-  color: #00eaff;
-  padding: 10px;
-  border-radius: 8px;
-  word-break: break-all;
+    opacity: 0.8;
+    margin-top: 15px;
+    font-size: 14px;
 }
