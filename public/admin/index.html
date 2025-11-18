@@ -1,1 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Sindhu Admin Panel</title>
+<link rel="stylesheet" href="admin.css">
+</head>
 
+<body>
+
+<h2>🔐 Sindhu Airdrop – Admin Panel</h2>
+
+<!-- ================================
+       STAT BOXES
+================================ -->
+<div class="stats">
+    <div class="box">
+        <h3>Total Users</h3>
+        <span id="totalUsers">0</span>
+    </div>
+
+    <div class="box">
+        <h3>Total Earnings</h3>
+        <span id="totalEarnings">0 🪙</span>
+    </div>
+
+    <div class="box">
+        <h3>Total Referrals</h3>
+        <span id="totalRefs">0</span>
+    </div>
+</div>
+
+<!-- ================================
+       SCROLLING MESSAGE
+================================ -->
+<h3>📢 Scrolling Message</h3>
+<textarea id="scrollMsg" placeholder="Type message..."></textarea>
+<button onclick="saveMsg()">Save Message</button>
+
+<hr>
+
+<!-- ================================
+       BROADCAST TO ALL USERS
+================================ -->
+<h3>📨 Send Message to All Users</h3>
+<textarea id="broadcastBox" placeholder="Enter message to send..."></textarea>
+<br>
+<button onclick="sendBroadcast()">Send to All Users</button>
+
+<p id="broadcastStatus" style="color:green; font-weight:bold;"></p>
+
+<hr>
+
+<!-- ================================
+       USER TABLE
+================================ -->
+<h3>👥 User List</h3>
+
+<input type="text" id="searchBox"
+       placeholder="Search wallet or user ID..."
+       onkeyup="filterUsers()">
+
+<button onclick="downloadCSV()">📥 Download CSV</button>
+
+<table id="userTable">
+    <thead>
+        <tr>
+            <th>User ID</th>
+            <th>Wallet</th>
+            <th>Coins</th>
+            <th>Referrals</th>
+            <th>Date Joined</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script src="admin.js"></script>
+
+</body>
+</html>
