@@ -1,5 +1,5 @@
 // ===============================
-//  Sindhu Airdrop – index.js (FIXED)
+//  Sindhu Airdrop – index.js
 // ===============================
 
 const TelegramBot = require("node-telegram-bot-api");
@@ -14,16 +14,19 @@ console.log("BOT_TOKEN =", process.env.BOT_TOKEN);
 console.log("WEBAPP_URL =", process.env.WEBAPP_URL);
 console.log("BOT_USERNAME =", process.env.BOT_USERNAME);
 
-if (!process.env.BOT_TOKEN) process.exit(1);
-if (!process.env.WEBAPP_URL) process.exit(1);
-if (!process.env.BOT_USERNAME) process.exit(1);
+// ENV CHECK
+if (!process.env.BOT_TOKEN) process.exit(console.log("❌ Missing BOT_TOKEN"));
+if (!process.env.WEBAPP_URL) process.exit(console.log("❌ Missing WEBAPP_URL"));
+if (!process.env.BOT_USERNAME) process.exit(console.log("❌ Missing BOT_USERNAME"));
+
+console.log("ENV LOADED OK");
+
+// ------------------------------
+// BOT INITIALIZE (WEBHOOK MODE)
+// ------------------------------
 
 const TOKEN = process.env.BOT_TOKEN;
 const WEBAPP_URL = process.env.WEBAPP_URL;
-
-// ------------------------------
-// BOT INITIALIZE (WEBHOOK)
-// ------------------------------
 
 const bot = new TelegramBot(TOKEN, { polling: false });
 global.bot = bot;
@@ -45,6 +48,7 @@ CREATE TABLE IF NOT EXISTS users (
 )
 `);
 
+// GET USER OR CREATE
 function getUser(id, cb) {
   db.get("SELECT * FROM users WHERE id=?", [id], (err, row) => {
     if (!row) {
@@ -58,21 +62,18 @@ function getUser(id, cb) {
 }
 
 // ------------------------------
-// /start HANDLER
+//  /start COMMAND  (FIXED)
 // ------------------------------
 
-bot.onText(/\/start(.*)?/, async (msg, match) => {
-  const userId = msg.from.id;
-  const ref = match[1]?.replace(" ", "").replace("=", "");
+bot.onText(/\/start(.*)?/, (msg, match) => {
+  console.log("🔥 /start handler TRIGGERED");
 
-  // First create user
+  const userId = msg.from.id;
+  const ref = (match[1] || "").replace("=", "").trim();
+
   getUser(userId, () => {
-    // Then update referral
-    if (ref && ref !== userId.toString()) {
-      db.run(
-        "UPDATE users SET total_referrals = total_referrals + 1 WHERE id=?",
-        [ref]
-      );
+    if (ref !== "" && ref !== userId.toString()) {
+      db.run("UPDATE users SET total_referrals = total_referrals + 1 WHERE id=?", [ref]);
     }
 
     bot.sendMessage(userId, "🔥 Welcome to Sindhu Airdrop!", {
@@ -89,79 +90,67 @@ bot.onText(/\/start(.*)?/, async (msg, match) => {
 });
 
 // ------------------------------
-// WEBAPP TAP DATA
+// TAP HANDLER (WEB APP DATA)
 // ------------------------------
 
 bot.on("web_app_data", (msg) => {
   const userId = msg.from.id;
-  let data;
-
   try {
-    data = JSON.parse(msg.web_app_data.data);
-  } catch (e) {
-    return;
-  }
+    const data = JSON.parse(msg.web_app_data.data);
+    const taps = data.taps || 0;
 
-  const taps = data.taps || 0;
+    db.run("UPDATE users SET coins = coins + ?, daily_taps = daily_taps + ? WHERE id=?", 
+      [taps, taps, userId]
+    );
 
-  db.run(
-    "UPDATE users SET coins = coins + ?, daily_taps = daily_taps + ? WHERE id=?",
-    [taps, taps, userId]
-  );
-
-  bot.sendMessage(userId, `🔥 +${taps} coins added!`);
+    bot.sendMessage(userId, `🔥 +${taps} coins added!`);
+  } catch (err) {}
 });
 
 // ------------------------------
-// CALLBACK BUTTONS
+// BUTTON CLICK HANDLERS
 // ------------------------------
 
 bot.on("callback_query", (query) => {
   const userId = query.from.id;
+  const action = query.data;
 
-  bot.answerCallbackQuery(query.id); // IMPORTANT
+  bot.answerCallbackQuery(query.id);
 
-  if (query.data === "leaderboard") {
-    db.all(
-      "SELECT id, coins FROM users ORDER BY coins DESC LIMIT 10",
-      (err, rows) => {
-        let txt = "🏆 Top Players:\n\n";
-        rows.forEach((u, i) => {
-          txt += `${i + 1}. User ${u.id} — ${u.coins} 🪙\n`;
-        });
-        bot.sendMessage(userId, txt);
-      }
-    );
+  if (action === "leaderboard") {
+    db.all("SELECT id, coins FROM users ORDER BY coins DESC LIMIT 10", (err, rows) => {
+      let text = "🏆 Top Players:\n\n";
+      rows.forEach((u, i) => {
+        text += `${i+1}. User ${u.id} — ${u.coins}🪙\n`;
+      });
+      bot.sendMessage(userId, text);
+    });
   }
 
-  if (query.data === "referral") {
-    bot.sendMessage(
-      userId,
-      `🎁 Invite & Earn:\nhttps://t.me/${process.env.BOT_USERNAME}?start=${userId}`
-    );
+  if (action === "referral") {
+    bot.sendMessage(userId, `👥 Referral Link:\nhttps://t.me/${process.env.BOT_USERNAME}?start=${userId}`);
   }
 
-  if (query.data === "wallet") {
+  if (action === "wallet") {
     bot.sendMessage(userId, "💳 Send your Polygon wallet (starts with 0x)");
   }
 });
 
 // ------------------------------
-// WALLET HANDLER (FIXED)
+// FIXED MESSAGE HANDLER
 // ------------------------------
 
 bot.on("message", (msg) => {
   if (!msg.text) return;
 
-  // Allow commands to pass
+  // Ignore commands (/start /help etc)
   if (msg.text.startsWith("/")) return;
 
-  // Only accept wallet address
-  if (!msg.text.startsWith("0x")) return;
-
-  db.run("UPDATE users SET wallet=? WHERE id=?", [msg.text, msg.from.id]);
-  bot.sendMessage(msg.from.id, "✅ Wallet saved!");
+  // Accept wallet only
+  if (msg.text.startsWith("0x")) {
+    db.run("UPDATE users SET wallet=? WHERE id=?", [msg.text, msg.from.id]);
+    bot.sendMessage(msg.from.id, "✅ Wallet saved!");
+  }
 });
 
 console.log("Bot fully loaded.");
-console.log("Bot is running...");
