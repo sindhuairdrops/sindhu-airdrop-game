@@ -4,40 +4,17 @@ console.log("== STARTING APPLICATION ==");
 
 require("dotenv").config();
 
-const TelegramBot = require("node-telegram-bot-api");
 const express = require("express");
 const path = require("path");
 
 // ---------------------------------------
-// 1. LOAD BOT
+// 1. LOAD BOT (index.js handles bot setup)
 // ---------------------------------------
 console.log("Loading bot...");
-
-// 🔥 LOAD BOT COMMANDS (.onText, .callback_query, etc.)
-require("./index.js");
-
-const bot = new TelegramBot(process.env.BOT_TOKEN, {
-  polling: false
-});
-
-// Make bot global for webhook handler
-global.bot = bot;
-
-bot.on("message", (msg) => {
-  console.log("Message received:", msg.text);
-});
+require("./index.js");   // <-- IMPORTANT FIX
 
 // ---------------------------------------
-// 2. SET WEBHOOK
-// ---------------------------------------
-const WEBHOOK_URL = process.env.WEBAPP_URL + "/webhook";
-
-bot.setWebHook(WEBHOOK_URL)
-  .then(() => console.log("Webhook set:", WEBHOOK_URL))
-  .catch(err => console.error("Webhook error:", err));
-
-// ---------------------------------------
-// 3. START EXPRESS SERVER
+// 2. START EXPRESS SERVER
 // ---------------------------------------
 console.log("Starting server...");
 
@@ -68,7 +45,7 @@ app.post("/webhook", (req, res) => {
     global.bot.processUpdate(req.body);
     return res.sendStatus(200);
   } catch (err) {
-    console.error("Webhook process ERROR:", err);
+    console.error("Webhook ERROR:", err);
     return res.sendStatus(500);
   }
 });
