@@ -1,13 +1,7 @@
 const tg = window.Telegram.WebApp;
-tg.expand();
 
-const userId = tg.initDataUnsafe.user?.id;
-const botUsername = "SindhuAirdrop_bot";
+tg.ready();
+const uid = tg.initDataUnsafe.user.id;
 
-const link = `https://t.me/${botUsername}?start=${userId}`;
-document.getElementById("ref").value = link;
-
-function copyLink() {
-    navigator.clipboard.writeText(link);
-    tg.showAlert("Referral link copied!");
-}
+document.getElementById("refLink").innerHTML =
+    `https://t.me/${tg.initDataUnsafe?.bot?.username}?start=${uid}`;
