@@ -2,38 +2,14 @@
 //  Sindhu Airdrop – index.js
 // ===============================
 
-const TelegramBot = require("node-telegram-bot-api");
+// Bot object from main.js
+const bot = global.bot;
+
 const sqlite3 = require("sqlite3").verbose();
 
-// ------------------------------
-// DEBUG LOGS
-// ------------------------------
+console.log("== INDEX.JS LOADED ==");
 
-console.log("== DEBUG START ==");
-console.log("BOT_TOKEN =", process.env.BOT_TOKEN);
-console.log("WEBAPP_URL =", process.env.WEBAPP_URL);
-console.log("BOT_USERNAME =", process.env.BOT_USERNAME);
-
-// ENV CHECK
-if (!process.env.BOT_TOKEN) process.exit(console.log("❌ Missing BOT_TOKEN"));
-if (!process.env.WEBAPP_URL) process.exit(console.log("❌ Missing WEBAPP_URL"));
-if (!process.env.BOT_USERNAME) process.exit(console.log("❌ Missing BOT_USERNAME"));
-
-console.log("ENV LOADED OK");
-
-// ------------------------------
-// BOT INITIALIZE (WEBHOOK MODE)
-// ------------------------------
-
-const TOKEN = process.env.BOT_TOKEN;
-const WEBAPP_URL = process.env.WEBAPP_URL;
-
-const bot = new TelegramBot(TOKEN, { polling: false });
-global.bot = bot;
-
-// ------------------------------
-// DATABASE
-// ------------------------------
+// DATABASE -----------------------------------
 
 const db = new sqlite3.Database("database.sqlite");
 
@@ -48,7 +24,6 @@ CREATE TABLE IF NOT EXISTS users (
 )
 `);
 
-// GET USER OR CREATE
 function getUser(id, cb) {
   db.get("SELECT * FROM users WHERE id=?", [id], (err, row) => {
     if (!row) {
@@ -61,25 +36,23 @@ function getUser(id, cb) {
   });
 }
 
-// ------------------------------
-//  /start COMMAND  (FIXED)
-// ------------------------------
+// START COMMAND --------------------------------
 
 bot.onText(/\/start(.*)?/, (msg, match) => {
-  console.log("🔥 /start handler TRIGGERED");
+  console.log("🔥 /start TRIGGERED");
 
   const userId = msg.from.id;
   const ref = (match[1] || "").replace("=", "").trim();
 
   getUser(userId, () => {
-    if (ref !== "" && ref !== userId.toString()) {
+    if (ref && ref !== "" && ref !== userId.toString()) {
       db.run("UPDATE users SET total_referrals = total_referrals + 1 WHERE id=?", [ref]);
     }
 
     bot.sendMessage(userId, "🔥 Welcome to Sindhu Airdrop!", {
       reply_markup: {
         inline_keyboard: [
-          [{ text: "🪙 Press to Earn", web_app: { url: WEBAPP_URL } }],
+          [{ text: "🪙 Press to Earn", web_app: { url: process.env.WEBAPP_URL } }],
           [{ text: "🏆 Leaderboard", callback_data: "leaderboard" }],
           [{ text: "🎁 Referral", callback_data: "referral" }],
           [{ text: "💰 Wallet", callback_data: "wallet" }]
@@ -89,17 +62,16 @@ bot.onText(/\/start(.*)?/, (msg, match) => {
   });
 });
 
-// ------------------------------
-// TAP HANDLER (WEB APP DATA)
-// ------------------------------
+// TAP EVENTS -----------------------------------
 
 bot.on("web_app_data", (msg) => {
   const userId = msg.from.id;
+
   try {
     const data = JSON.parse(msg.web_app_data.data);
     const taps = data.taps || 0;
 
-    db.run("UPDATE users SET coins = coins + ?, daily_taps = daily_taps + ? WHERE id=?", 
+    db.run("UPDATE users SET coins = coins + ?, daily_taps = daily_taps + ? WHERE id=?",
       [taps, taps, userId]
     );
 
@@ -107,9 +79,7 @@ bot.on("web_app_data", (msg) => {
   } catch (err) {}
 });
 
-// ------------------------------
-// BUTTON CLICK HANDLERS
-// ------------------------------
+// CALLBACK BUTTONS -----------------------------
 
 bot.on("callback_query", (query) => {
   const userId = query.from.id;
@@ -132,25 +102,20 @@ bot.on("callback_query", (query) => {
   }
 
   if (action === "wallet") {
-    bot.sendMessage(userId, "💳 Send your Polygon wallet (starts with 0x)");
+    bot.sendMessage(userId, "💳 Send your Polygon wallet address (0x...)");
   }
 });
 
-// ------------------------------
-// FIXED MESSAGE HANDLER
-// ------------------------------
+// WALLET --------------------------------------
 
 bot.on("message", (msg) => {
   if (!msg.text) return;
-
-  // Ignore commands (/start /help etc)
   if (msg.text.startsWith("/")) return;
 
-  // Accept wallet only
   if (msg.text.startsWith("0x")) {
     db.run("UPDATE users SET wallet=? WHERE id=?", [msg.text, msg.from.id]);
     bot.sendMessage(msg.from.id, "✅ Wallet saved!");
   }
 });
 
-console.log("Bot fully loaded.");
+console.log("Bot logic loaded.");
