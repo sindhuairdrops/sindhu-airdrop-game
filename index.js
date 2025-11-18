@@ -6,15 +6,13 @@ const TelegramBot = require("node-telegram-bot-api");
 const sqlite3 = require("sqlite3").verbose();
 
 // ------------------------------
-// DEBUG LOGS
+// DEBUG
 // ------------------------------
-
 console.log("== DEBUG START ==");
 console.log("BOT_TOKEN =", process.env.BOT_TOKEN);
 console.log("WEBAPP_URL =", process.env.WEBAPP_URL);
 console.log("BOT_USERNAME =", process.env.BOT_USERNAME);
 
-// ENV CHECK
 if (!process.env.BOT_TOKEN) process.exit(console.log("❌ Missing BOT_TOKEN"));
 if (!process.env.WEBAPP_URL) process.exit(console.log("❌ Missing WEBAPP_URL"));
 if (!process.env.BOT_USERNAME) process.exit(console.log("❌ Missing BOT_USERNAME"));
@@ -22,19 +20,19 @@ if (!process.env.BOT_USERNAME) process.exit(console.log("❌ Missing BOT_USERNAM
 console.log("ENV LOADED OK");
 
 // ------------------------------
-// BOT INITIALIZE (WEBHOOK MODE)
+// BOT INIT
 // ------------------------------
-
-const TOKEN = process.env.BOT_TOKEN;
-const WEBAPP_URL = process.env.WEBAPP_URL;
-
-const bot = new TelegramBot(TOKEN, { polling: false });
+const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: false });
 global.bot = bot;
+
+// Webhook
+bot.setWebHook(`${process.env.WEBAPP_URL}/webhook`)
+  .then(() => console.log("Webhook set OK"))
+  .catch(err => console.error("Webhook error:", err));
 
 // ------------------------------
 // DATABASE
 // ------------------------------
-
 const db = new sqlite3.Database("database.sqlite");
 
 db.run(`
@@ -43,67 +41,61 @@ CREATE TABLE IF NOT EXISTS users (
   wallet TEXT,
   coins INTEGER DEFAULT 0,
   daily_taps INTEGER DEFAULT 0,
+  last_tap_date TEXT,
   total_referrals INTEGER DEFAULT 0,
-  joined_date TEXT,
-  last_login TEXT
+  joined_date TEXT
 )
 `);
 
-// GET USER OR CREATE
+// Create or fetch user
 function getUser(id, cb) {
   db.get("SELECT * FROM users WHERE id=?", [id], (err, row) => {
+    const today = new Date().toLocaleDateString();
+
     if (!row) {
       db.run(
-        "INSERT INTO users (id, coins, daily_taps, total_referrals, joined_date, last_login) VALUES (?, 0, 0, 0, datetime('now'), NULL)",
-        [id],
-        () => cb({ id, coins: 0, daily_taps: 0, total_referrals: 0 })
+        `INSERT INTO users (id, coins, daily_taps, last_tap_date, total_referrals, joined_date)
+         VALUES (?, 0, 0, ?, 0, datetime('now'))`,
+        [id, today],
+        () => cb({
+          id, coins: 0, daily_taps: 0, last_tap_date: today, total_referrals: 0
+        })
       );
-    } else cb(row);
+    } else {
+      // RESET DAILY IF NEW DAY
+      if (row.last_tap_date !== today) {
+        db.run(
+          "UPDATE users SET daily_taps=0, last_tap_date=? WHERE id=?",
+          [today, id]
+        );
+        row.daily_taps = 0;
+        row.last_tap_date = today;
+      }
+      cb(row);
+    }
   });
 }
 
 // ------------------------------
-//  /start COMMAND
+// /start COMMAND
 // ------------------------------
-
 bot.onText(/\/start(.*)?/, (msg, match) => {
-  console.log("🔥 /start TRIGGERED");
-
   const userId = msg.from.id;
   const ref = (match[1] || "").replace("=", "").trim();
 
-  getUser(userId, () => {
-
-    // ------------------------------
-    // DAILY LOGIN BONUS +100
-    // ------------------------------
-    db.get("SELECT last_login FROM users WHERE id=?", [userId], (err, row) => {
-      const today = new Date().toISOString().slice(0, 10);
-
-      if (!row.last_login || row.last_login !== today) {
-        db.run("UPDATE users SET coins = coins + 100, last_login=? WHERE id=?", 
-          [today, userId]
-        );
-        bot.sendMessage(userId, "🎉 Daily Login Bonus: +100 coins!");
-      }
-    });
-
-    // ------------------------------
-    // REFERRAL BONUS +500
-    // ------------------------------
+  getUser(userId, user => {
+    // REFERRAL LOGIC
     if (ref && ref !== "" && ref !== userId.toString()) {
       db.run(
-        "UPDATE users SET coins = coins + 500, total_referrals = total_referrals + 1 WHERE id=?",
+        "UPDATE users SET total_referrals = total_referrals + 1, coins = coins + 500 WHERE id=?",
         [ref]
       );
-      bot.sendMessage(ref, "🎉 You earned +500 coins from a referral!");
     }
 
-    // MAIN MENU
     bot.sendMessage(userId, "🔥 Welcome to Sindhu Airdrop!", {
       reply_markup: {
         inline_keyboard: [
-          [{ text: "🪙 Press to Earn", web_app: { url: WEBAPP_URL } }],
+          [{ text: "🪙 Press to Earn", web_app: { url: process.env.WEBAPP_URL } }],
           [{ text: "🏆 Leaderboard", callback_data: "leaderboard" }],
           [{ text: "🎁 Referral", callback_data: "referral" }],
           [{ text: "💰 Wallet", callback_data: "wallet" }]
@@ -114,51 +106,48 @@ bot.onText(/\/start(.*)?/, (msg, match) => {
 });
 
 // ------------------------------
-// TAP HANDLER (WEB APP DATA)
+// WEBAPP TAP DATA
 // ------------------------------
-
 bot.on("web_app_data", (msg) => {
   const userId = msg.from.id;
-  let data;
 
+  let data;
   try {
     data = JSON.parse(msg.web_app_data.data);
-  } catch (e) {
-    return;
-  }
+  } catch { return; }
 
-  const tapCount = data.taps || 0;
-  const DAILY_LIMIT = 200;
+  const today = new Date().toLocaleDateString();
 
-  db.get("SELECT daily_taps, coins FROM users WHERE id=?", [userId], (err, row) => {
-
-    const current = row.daily_taps || 0;
-
-    if (current >= DAILY_LIMIT) {
-      bot.sendMessage(userId, "⛔ Daily tap limit reached (200). Come back tomorrow.");
+  getUser(userId, user => {
+    // DAILY LOGIN BONUS
+    if (data.daily_bonus === 100) {
+      db.run("UPDATE users SET coins = coins + 100 WHERE id=?", [userId]);
+      bot.sendMessage(userId, "🎉 Daily Login Bonus +100!");
       return;
     }
 
-    const remaining = DAILY_LIMIT - current;
-    const allowed = Math.min(tapCount, remaining);
+    // TAPS
+    const taps = data.taps || 0;
 
-    db.run("UPDATE users SET coins = coins + ?, daily_taps = daily_taps + ? WHERE id=?", 
-      [allowed, allowed, userId]
+    if (user.daily_taps >= 200) {
+      bot.sendMessage(userId, "⚠️ Daily tap limit reached (200).");
+      return;
+    }
+
+    const allowed = Math.min(taps, 200 - user.daily_taps);
+
+    db.run(
+      "UPDATE users SET coins = coins + ?, daily_taps = daily_taps + ?, last_tap_date=? WHERE id=?",
+      [allowed, allowed, today, userId]
     );
 
-    const total = row.coins + allowed;
-
-    bot.sendMessage(
-      userId,
-      `🔥 +${allowed} coins!\n🏆 Total Earned: ${total}\nRemaining taps: ${remaining - allowed}`
-    );
+    bot.sendMessage(userId, `🔥 +${allowed} coins added!`);
   });
 });
 
 // ------------------------------
-// CALLBACK HANDLERS
+// CALLBACK BUTTONS
 // ------------------------------
-
 bot.on("callback_query", (query) => {
   const userId = query.from.id;
   const action = query.data;
@@ -166,39 +155,40 @@ bot.on("callback_query", (query) => {
   bot.answerCallbackQuery(query.id);
 
   if (action === "leaderboard") {
-    db.all("SELECT id, coins FROM users ORDER BY coins DESC LIMIT 10", (err, rows) => {
-      let text = "🏆 Top Players:\n\n";
-      rows.forEach((u, i) => {
-        text += `${i+1}. User ${u.id} — ${u.coins}🪙\n`;
-      });
-      bot.sendMessage(userId, text);
-    });
+    db.all(
+      "SELECT id, coins FROM users ORDER BY coins DESC LIMIT 10",
+      (err, rows) => {
+        let t = "🏆 Top Players:\n\n";
+        rows.forEach((u, i) => {
+          t += `${i+1}. User ${u.id} — ${u.coins} 🪙\n`;
+        });
+        bot.sendMessage(userId, t);
+      }
+    );
   }
 
   if (action === "referral") {
     bot.sendMessage(
       userId,
-      `👥 Referral Link:\nhttps://t.me/${process.env.BOT_USERNAME}?start=${userId}`
+      `👥 Invite & Earn:\nhttps://t.me/${process.env.BOT_USERNAME}?start=${userId}`
     );
   }
 
   if (action === "wallet") {
-    bot.sendMessage(userId, "💳 Send your Polygon wallet (starts with 0x)");
+    bot.sendMessage(userId, "💳 Send your Polygon wallet (0x...)");
   }
 });
 
 // ------------------------------
-// MESSAGE HANDLER (WALLET)
+// WALLET SAVE
 // ------------------------------
-
 bot.on("message", (msg) => {
   if (!msg.text) return;
   if (msg.text.startsWith("/")) return;
+  if (!msg.text.startsWith("0x")) return;
 
-  if (msg.text.startsWith("0x")) {
-    db.run("UPDATE users SET wallet=? WHERE id=?", [msg.text, msg.from.id]);
-    bot.sendMessage(msg.from.id, "✅ Wallet saved!");
-  }
+  db.run("UPDATE users SET wallet=? WHERE id=?", [msg.text, msg.from.id]);
+  bot.sendMessage(msg.from.id, "✅ Wallet saved!");
 });
 
 console.log("Bot fully loaded.");
