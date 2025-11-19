@@ -2,18 +2,20 @@
 // Telegram WebApp API Init
 // --------------------------------------
 const tg = window.Telegram.WebApp;
-tg.ready();
 tg.expand();
 
 // Elements
 const tapButton = document.getElementById("tapButton");
 const coinsDisplay = document.getElementById("coins");
 const tapSound = document.getElementById("tapSound");
-const info = document.querySelector(".tap-info");
+const bonusBtn = document.getElementById("dailyBonusBtn");
 
-// Unlock audio after first user click
+// Telegram sound unlock
 let soundEnabled = false;
-document.addEventListener("click", () => soundEnabled = true, { once: true });
+
+document.addEventListener("click", () => {
+    soundEnabled = true;
+}, { once: true });
 
 function playSound() {
     if (!soundEnabled) return;
@@ -21,47 +23,13 @@ function playSound() {
     tapSound.play().catch(() => {});
 }
 
-// --------------------------------------
-// Load local user progress
-// --------------------------------------
-let totalCoins = Number(localStorage.getItem("totalCoins") || 0);
-let dailyTaps = Number(localStorage.getItem("dailyTaps") || 0);
-let lastLogin = localStorage.getItem("lastLoginDate") || "";
+let coins = 0;
 
-// --------------------------------------
-// DAILY RESET (midnight)
-// --------------------------------------
-function checkDailyReset() {
-    const today = new Date().toLocaleDateString();
-
-    if (lastLogin !== today) {
-        // NEW DAY → Reset
-        dailyTaps = 0;
-        localStorage.setItem("dailyTaps", 0);
-
-        // STORE NEW DATE
-        lastLogin = today;
-        localStorage.setItem("lastLoginDate", today);
-
-        // Give daily login bonus +100
-        totalCoins += 100;
-        localStorage.setItem("totalCoins", totalCoins);
-
-        tg.sendData(JSON.stringify({ daily_bonus: 100 }));
-
-        info.textContent = "🎉 Daily Login Bonus +100!";
-        setTimeout(() => info.textContent = "Tap the logo to earn coins!", 2000);
-    }
-}
-checkDailyReset();
-
-// --------------------------------------
-// Smooth Counter Animation
-// --------------------------------------
+// Animate coin counter
 function animateCoins(newCoins) {
-    let start = totalCoins;
+    let start = coins;
     let end = newCoins;
-    let duration = 250;
+    let duration = 200;
     let startTime = performance.now();
 
     function update(time) {
@@ -69,35 +37,35 @@ function animateCoins(newCoins) {
         coinsDisplay.textContent = Math.floor(start + (end - start) * progress);
         if (progress < 1) requestAnimationFrame(update);
     }
+
     requestAnimationFrame(update);
 }
 
-// Load initial
-coinsDisplay.textContent = totalCoins;
-
-// --------------------------------------
-// TAP LOGIC (limit 200/day)
-// --------------------------------------
+// TAP
 tapButton.addEventListener("click", () => {
-    if (dailyTaps >= 200) {
-        info.textContent = "⚠️ Daily limit reached (200)";
-        return;
-    }
-
-    dailyTaps++;
-    totalCoins++;
-
-    // Save to device
-    localStorage.setItem("dailyTaps", dailyTaps);
-    localStorage.setItem("totalCoins", totalCoins);
-
-    animateCoins(totalCoins);
+    coins++;
+    animateCoins(coins);
     playSound();
 
     if (navigator.vibrate) navigator.vibrate(40);
 
-    // Send Tap Event to Telegram Bot
     tg.sendData(JSON.stringify({ taps: 1 }));
+});
 
-    info.textContent = `Taps today: ${dailyTaps}/200`;
+// DAILY BONUS
+bonusBtn.addEventListener("click", () => {
+    tg.sendData(JSON.stringify({ daily_bonus: 100 }));
+    bonusBtn.disabled = true;
+    bonusBtn.textContent = "🎉 Bonus Claimed!";
+});
+
+// WEBSITE LINK BUTTON
+document.getElementById("websiteLink").addEventListener("click", function(e){
+    e.preventDefault();
+    const url = "https://sindhu.in.net/";
+    try {
+        window.Telegram.WebApp.openLink(url);
+    } catch {
+        window.open(url, "_blank");
+    }
 });
