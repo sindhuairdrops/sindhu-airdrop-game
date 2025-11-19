@@ -1,0 +1,96 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: #000;
+    font-family: Arial, sans-serif;
+    color: white;
+    text-align: center;
+}
+
+.container {
+    padding: 20px;
+}
+
+.title {
+    font-size: 26px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.total-box, .today-box {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    padding: 10px 15px;
+    margin: 10px auto;
+    width: 80%;
+    border-radius: 14px;
+    font-size: 18px;
+}
+
+.coin-btn {
+    background: none;
+    border: none;
+    margin-top: 20px;
+}
+
+.coin-logo {
+    width: 200px;
+    animation: glow 2s infinite ease-in-out;
+}
+
+@keyframes glow {
+    0% { filter: drop-shadow(0 0 5px gold); }
+    50% { filter: drop-shadow(0 0 20px gold); }
+    100% { filter: drop-shadow(0 0 5px gold); }
+}
+
+/* Price box */
+.price-box {
+    background: rgba(255,255,255,0.08);
+    padding: 15px;
+    border-radius: 16px;
+    width: 85%;
+    margin: 20px auto;
+    backdrop-filter: blur(12px);
+}
+
+.price-title {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#livePrice {
+    font-size: 22px;
+    margin: 10px 0;
+}
+
+.buy-btn {
+    display: block;
+    margin-top: 12px;
+    padding: 10px;
+    background: #00cc66;
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 10px;
+}
+
+.buy-btn:hover {
+    background: #00aa55;
+}
+
+/* FOOTER */
+.footer {
+    margin-top: 25px;
+    opacity: 0.7;
+}
+
+.footer a {
+    color: #ccc;
+    text-decoration: none;
+}
+
+canvas {
+    margin-top: 10px;
+    height: 60px !important;
+}
