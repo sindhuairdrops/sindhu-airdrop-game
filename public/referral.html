@@ -1,18 +1,68 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Referral</title>
-<link rel="stylesheet" href="style.css">
+<meta charset="UTF-8" />
+<title>Referral Program</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    body {
+        background: #111;
+        color: #fff;
+        font-family: Arial;
+        text-align: center;
+        padding: 20px;
+    }
+    .box {
+        background: #222;
+        padding: 18px;
+        border-radius: 12px;
+    }
+    .linkbox {
+        background: #333;
+        padding: 10px;
+        border-radius: 8px;
+        margin-top: 10px;
+        word-wrap: break-word;
+    }
+    button {
+        background: #00eaff;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 10px;
+        margin-top: 15px;
+        font-size: 16px;
+    }
+</style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 
 <body>
-<h2>🎁 Referral</h2>
 
-<p>Your invite link:</p>
+<h2>🎁 Referral Rewards</h2>
 
-<div id="refLink" style="font-size:16px; margin-top:10px;"></div>
+<div class="box">
+    <p>Invite your friends and earn <b>500 Coins</b> per referral!</p>
 
-<script src="referral.js"></script>
+    <div id="link" class="linkbox">Loading...</div>
+    <button onclick="copyLink()">Copy Link</button>
+</div>
+
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const userId = tg.initDataUnsafe.user.id;
+    const botUsername = "YOUR_BOT_USERNAME";   // <<< CHANGE THIS
+
+    const link = `https://t.me/${botUsername}?start=${userId}`;
+
+    document.getElementById("link").innerText = link;
+
+    function copyLink() {
+        navigator.clipboard.writeText(link);
+        tg.showPopup({ title: "Copied!", message: "Referral link copied!" });
+    }
+</script>
+
 </body>
 </html>
