@@ -20,17 +20,7 @@ const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: false });
 global.bot = bot;
 
 // Load bot handlers
-require("./index");   // <--- IMPORTANT: LOAD index.js HERE
-
-// ---------------------------------------
-//  SET WEBHOOK
-// ---------------------------------------
-
-const WEBHOOK_URL = process.env.WEBAPP_URL + "/webhook";
-
-bot.setWebHook(WEBHOOK_URL)
-  .then(() => console.log("Webhook set:", WEBHOOK_URL))
-  .catch(err => console.error("Webhook error:", err));
+require("./index");   // <--- LOAD BOT CODE
 
 // ---------------------------------------
 // START EXPRESS SERVER
@@ -57,11 +47,11 @@ try {
 // WEBHOOK ENDPOINT (VERY IMPORTANT)
 app.post("/webhook", (req, res) => {
   try {
-    global.bot.processUpdate(req.body);   // <--- SEND UPDATE TO BOT
-    return res.sendStatus(200);
+    global.bot.processUpdate(req.body);
+    res.sendStatus(200);
   } catch (err) {
     console.error("Webhook processing error:", err);
-    return res.sendStatus(500);
+    res.sendStatus(500);
   }
 });
 
