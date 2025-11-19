@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sindhu Airdrop Tap Game</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>🔥 Sindhu Airdrop</h2>
+
+    <!-- TOTAL COINS -->
+    <div class="coin-counter">
+        <span id="coins">0</span> 🪙
+    </div>
+
+    <!-- DAILY BONUS -->
+    <button id="dailyBonusBtn" class="bonus-btn">
+        🎁 Daily Bonus +100
+    </button>
+
+    <!-- TAP BUTTON -->
+    <button id="tapButton">
+        <img src="logo.png" class="logo">
+    </button>
+
+    <p class="tap-info">Tap the logo to earn coins! (Max 200/day)</p>
+
+    <!-- WEBSITE LINK -->
+    <div class="website-box">
+        <a href="https://sindhu.in.net/" id="websiteLink" target="_blank">
+            🌐 Visit Official Website
+        </a>
+    </div>
+
+</div>
+
+<audio id="tapSound" src="tap.mp3"></audio>
+
+<!-- Telegram WebApp API -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="tap.js"></script>
+
+</body>
+</html>
