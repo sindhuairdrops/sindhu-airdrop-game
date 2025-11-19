@@ -1,102 +1,93 @@
+// --------------------------------------
+// Telegram WebApp Init
+// --------------------------------------
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-const totalCoins = document.getElementById("totalCoins");
-const todayCoins = document.getElementById("todayCoins");
-const tapSound = document.getElementById("tapSound");
+// Elements
 const tapButton = document.getElementById("tapButton");
-const livePrice = document.getElementById("livePrice");
+const totalCoinsEl = document.getElementById("totalCoins");
+const todayText = document.getElementById("todayText");
+const tapSound = document.getElementById("tapSound");
 
-// SOUND UNLOCK FIX
+// Telegram sound unlock
 let soundEnabled = false;
-document.addEventListener("click", () => soundEnabled = true, { once: true });
+document.addEventListener("click", () => {
+    soundEnabled = true;
+}, { once: true });
 
-function playTap() {
+function playSound() {
     if (!soundEnabled) return;
-    tapSound.currentTime = 0;
-    tapSound.play().catch(() => {});
-}
-
-/* -----------------------
-   TAP + SEND TO BOT
------------------------- */
-let total = 0;
-let today = 0;
-
-tapButton.addEventListener("click", () => {
-    if (today >= 200) return;
-
-    total++;
-    today++;
-
-    totalCoins.textContent = total;
-    todayCoins.textContent = today;
-
-    playTap();
-
-    tg.sendData(JSON.stringify({ taps: 1 }));
-});
-
-/* -----------------------
-   COINGECKO LIVE PRICE
------------------------- */
-async function loadPrice() {
-    try {
-        const res = await fetch(
-            "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_last_updated_at=true"
-        );
-
-        const data = await res.json();
-
-        // 👉 Replace later with your real Coin ID
-        livePrice.textContent = "$" + data.bitcoin.usd;
-
-    } catch (e) {
-        livePrice.textContent = "⚠ Error loading price";
+    if (tapSound) {
+        tapSound.currentTime = 0;
+        tapSound.play().catch(() => {});
     }
 }
 
-setInterval(loadPrice, 10000);
-loadPrice();
+let totalCoins = 0;
+let todayTaps = 0;
 
-/* -----------------------
-   MINI PRICE CHART
------------------------- */
-const ctx = document.getElementById("priceChart");
+// 🔥 Smooth animation for total coins
+function animateCoins(newCoins) {
+    let start = totalCoins;
+    let end = newCoins;
+    let duration = 200;
+    let startTime = performance.now();
 
-let chart;
+    function update(time) {
+        let progress = Math.min((time - startTime) / duration, 1);
+        totalCoinsEl.textContent = Math.floor(start + (end - start) * progress);
+        if (progress < 1) requestAnimationFrame(update);
+    }
 
-async function loadChart() {
-    const res = await fetch(
-        "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=1"
-    );
-    const priceData = await res.json();
+    requestAnimationFrame(update);
 
-    const prices = priceData.prices.map(p => p[1]);
-
-    if (chart) chart.destroy();
-
-    chart = new Chart(ctx, {
-        type: "line",
-        data: {
-            labels: prices.map((_, i) => i),
-            datasets: [{
-                data: prices,
-                borderColor: "gold",
-                borderWidth: 2,
-                tension: 0.4,
-                pointRadius: 0
-            }]
-        },
-        options: {
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { display: false },
-                y: { display: false }
-            }
-        }
-    });
+    totalCoins = newCoins;
 }
 
-loadChart();
-setInterval(loadChart, 15000);
+// ⭐ Update today's tap counter text
+function updateTodayText() {
+    todayText.innerText = `Taps today: ${todayTaps}/200`;
+}
+
+// --------------------------------------
+// Tap Button Handler
+// --------------------------------------
+tapButton.addEventListener("click", () => {
+    if (todayTaps >= 200) {
+        tg.showAlert("⚠️ Daily limit reached (200)");
+        return;
+    }
+
+    // PLAY SOUND & VIBRATE
+    playSound();
+    if (navigator.vibrate) navigator.vibrate(30);
+
+    // UPDATE LOCAL DATA
+    todayTaps++;
+    updateTodayText();
+
+    totalCoins++;
+    animateCoins(totalCoins);
+
+    // SEND TAP TO TELEGRAM
+    tg.sendData(JSON.stringify({
+        taps: 1
+    }));
+});
+
+// --------------------------------------
+// FETCH initial user stats from backend
+// --------------------------------------
+fetch("/user/info")
+  .then(r => r.json())
+  .then(data => {
+      totalCoins = data.total_coins || 0;
+      todayTaps = data.today_taps || 0;
+
+      totalCoinsEl.textContent = totalCoins;
+      updateTodayText();
+  })
+  .catch(() => {
+      console.log("User stats not loaded (optional)");
+  });
