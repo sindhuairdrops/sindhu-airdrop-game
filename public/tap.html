@@ -3,156 +3,51 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sindhu Airdrop</title>
-
-<style>
-    body {
-        background: #000;
-        color: #fff;
-        font-family: Arial, sans-serif;
-        text-align: center;
-        margin: 0;
-        padding: 0;
-    }
-
-    .scroll-msg {
-        width: 100%;
-        background: #111;
-        color: #00ffd5;
-        padding: 8px 0;
-        font-size: 14px;
-        overflow: hidden;
-        white-space: nowrap;
-        box-sizing: border-box;
-    }
-
-    .scroll-msg span {
-        display: inline-block;
-        padding-left: 100%;
-        animation: marquee 12s linear infinite;
-    }
-
-    @keyframes marquee {
-        0% { transform: translate(0, 0); }
-        100% { transform: translate(-100%, 0); }
-    }
-
-    h1 {
-        font-size: 28px;
-        margin-top: 15px;
-        color: #ffd700;
-        text-shadow: 0 0 10px #ffcc00;
-    }
-
-    .earnings {
-        font-size: 26px;
-        margin-top: 5px;
-    }
-
-    #main-coin {
-        width: 220px;
-        margin-top: 20px;
-        animation: pulse 2s infinite;
-        filter: drop-shadow(0 0 25px gold);
-    }
-
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.08); }
-        100% { transform: scale(1); }
-    }
-
-    #tapButton {
-        background: none;
-        border: none;
-    }
-
-    .today {
-        margin-top: 10px;
-        font-size: 18px;
-        color: #ccc;
-    }
-
-    .buttons {
-        margin-top: 25px;
-    }
-
-    .btn {
-        width: 85%;
-        padding: 12px;
-        background: #0f4cff;
-        border-radius: 10px;
-        margin: 8px auto;
-        color: #fff;
-        font-size: 18px;
-        display: block;
-        text-decoration: none;
-        font-weight: bold;
-    }
-
-    .btn:hover {
-        background: #1f65ff;
-    }
-
-    .footer {
-        margin-top: 20px;
-        font-size: 14px;
-        color: #bbb;
-    }
-</style>
-
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<title>Sindhu Airdrop Tap Game</title>
+<link rel="stylesheet" href="tap.css">
 </head>
 <body>
 
-<!-- 🔥 Scrolling admin message -->
 <div class="scroll-msg">
-    <span id="scrollText">Loading message...</span>
+    <marquee id="scrollingMessage">Loading...</marquee>
 </div>
 
-<h1>🔥 Sindhu Airdrop</h1>
+<div class="container">
 
-<!-- ⭐ TOTAL EARNINGS -->
-<div class="earnings">
-    <span id="totalCoins">0</span> 🪙
+    <h2 class="title">🔥 Sindhu Airdrop</h2>
+
+    <div class="stats-box">
+        <div>
+            <p class="label">Total Earnings</p>
+            <p class="value" id="totalCoins">0</p>
+        </div>
+        <div>
+            <p class="label">Today Earnings</p>
+            <p class="value" id="todayCoins">0</p>
+        </div>
+    </div>
+
+    <div class="logo-wrapper">
+        <img src="logo.png" class="logo" id="tapButton">
+    </div>
+
+    <p class="tap-text">Tap the logo to earn coins!</p>
+
+    <div class="footer-buttons">
+        <a class="btn" id="buyBtn">💰 Buy Sindhu Coin</a>
+        <a class="btn" id="priceBtn">📈 Live Price Chart</a>
+    </div>
+
 </div>
 
-<!-- 🔥 Tap logo -->
-<button id="tapButton">
-    <img id="main-coin" src="logo.png">
-</button>
+<footer>
+    <p>🌐 <a href="https://sindhucoin.in.net" target="_blank">sindhucoin.in.net</a></p>
+</footer>
 
-<!-- ⭐ Today’s earnings -->
-<div class="today" id="todayText">Taps today: 0/200</div>
+<audio id="tapSound" src="tap.mp3"></audio>
 
-<!-- Additional Buttons -->
-<div class="buttons">
-    <a class="btn" href="#" id="buyLink">Buy Sindhu Coin</a>
-    <a class="btn" href="#" id="chartLink">Live Price Chart</a>
-</div>
-
-<!-- Website footer -->
-<div class="footer">
-    🌐 https://sindhucoin.in.net
-</div>
-
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="tap.js"></script>
-
-<script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-
-    // Load scrolling message from admin panel
-    fetch("/admin/message")
-      .then(res => res.text())
-      .then(msg => {
-          document.getElementById("scrollText").innerText = msg || "Welcome to Sindhu Airdrop!";
-      });
-
-    // OPTIONAL: You can update these later
-    document.getElementById("buyLink").href = "https://quickswap.exchange/#/swap";  
-    document.getElementById("chartLink").href = "https://dexscreener.com";  
-</script>
 
 </body>
 </html>
