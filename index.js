@@ -25,8 +25,8 @@ console.log("ENV LOADED OK");
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: false });
 global.bot = bot;
 
-// ❌ REMOVE WEBHOOK HERE (Fixes 429 error)
-
+// ❗ DO NOT SET WEBHOOK HERE
+// Webhook is set ONLY in main.js
 
 // ------------------------------
 // DATABASE
@@ -45,6 +45,9 @@ CREATE TABLE IF NOT EXISTS users (
 )
 `);
 
+// ------------------------------
+// GET USER OR CREATE
+// ------------------------------
 function getUser(id, cb) {
   db.get("SELECT * FROM users WHERE id=?", [id], (err, row) => {
     const today = new Date().toLocaleDateString();
@@ -60,15 +63,16 @@ function getUser(id, cb) {
             coins: 0,
             daily_taps: 0,
             last_tap_date: today,
-            total_referrals: 0,
+            total_referrals: 0
           })
       );
     } else {
+      // RESET DAILY LIMIT IF NEW DAY
       if (row.last_tap_date !== today) {
-        db.run(
-          "UPDATE users SET daily_taps=0, last_tap_date=? WHERE id=?",
-          [today, id]
-        );
+        db.run("UPDATE users SET daily_taps=0, last_tap_date=? WHERE id=?", [
+          today,
+          id
+        ]);
         row.daily_taps = 0;
         row.last_tap_date = today;
       }
@@ -84,7 +88,8 @@ bot.onText(/\/start(.*)?/, (msg, match) => {
   const userId = msg.from.id;
   const ref = (match[1] || "").replace("=", "").trim();
 
-  getUser(userId, (user) => {
+  getUser(userId, user => {
+    // REFERRAL BONUS 500
     if (ref && ref !== "" && ref !== userId.toString()) {
       db.run(
         "UPDATE users SET total_referrals = total_referrals + 1, coins = coins + 500 WHERE id=?",
@@ -95,17 +100,12 @@ bot.onText(/\/start(.*)?/, (msg, match) => {
     bot.sendMessage(userId, "🔥 Welcome to Sindhu Airdrop!", {
       reply_markup: {
         inline_keyboard: [
-          [
-            {
-              text: "🪙 Press to Earn",
-              web_app: { url: process.env.WEBAPP_URL },
-            },
-          ],
+          [{ text: "🪙 Press to Earn", web_app: { url: process.env.WEBAPP_URL } }],
           [{ text: "🏆 Leaderboard", callback_data: "leaderboard" }],
           [{ text: "🎁 Referral", callback_data: "referral" }],
-          [{ text: "💰 Wallet", callback_data: "wallet" }],
-        ],
-      },
+          [{ text: "💰 Wallet", callback_data: "wallet" }]
+        ]
+      }
     });
   });
 });
@@ -113,7 +113,7 @@ bot.onText(/\/start(.*)?/, (msg, match) => {
 // ------------------------------
 // WEBAPP TAP DATA
 // ------------------------------
-bot.on("web_app_data", (msg) => {
+bot.on("web_app_data", msg => {
   const userId = msg.from.id;
 
   let data;
@@ -125,13 +125,15 @@ bot.on("web_app_data", (msg) => {
 
   const today = new Date().toLocaleDateString();
 
-  getUser(userId, (user) => {
+  getUser(userId, user => {
+    // DAILY LOGIN BONUS +100
     if (data.daily_bonus === 100) {
       db.run("UPDATE users SET coins = coins + 100 WHERE id=?", [userId]);
       bot.sendMessage(userId, "🎉 Daily Login Bonus +100!");
       return;
     }
 
+    // TAP HANDLING
     const taps = data.taps || 0;
 
     if (user.daily_taps >= 200) {
@@ -153,7 +155,7 @@ bot.on("web_app_data", (msg) => {
 // ------------------------------
 // CALLBACK BUTTONS
 // ------------------------------
-bot.on("callback_query", (query) => {
+bot.on("callback_query", query => {
   const userId = query.from.id;
   const action = query.data;
 
@@ -163,11 +165,11 @@ bot.on("callback_query", (query) => {
     db.all(
       "SELECT id, coins FROM users ORDER BY coins DESC LIMIT 10",
       (err, rows) => {
-        let t = "🏆 Top Players:\n\n";
+        let txt = "🏆 Top Players:\n\n";
         rows.forEach((u, i) => {
-          t += `${i + 1}. User ${u.id} — ${u.coins} 🪙\n`;
+          txt += `${i + 1}. User ${u.id} — ${u.coins} 🪙\n`;
         });
-        bot.sendMessage(userId, t);
+        bot.sendMessage(userId, txt);
       }
     );
   }
@@ -185,9 +187,9 @@ bot.on("callback_query", (query) => {
 });
 
 // ------------------------------
-// SAVE WALLET
+// SAVE WALLET ADDRESS
 // ------------------------------
-bot.on("message", (msg) => {
+bot.on("message", msg => {
   if (!msg.text) return;
   if (msg.text.startsWith("/")) return;
   if (!msg.text.startsWith("0x")) return;
