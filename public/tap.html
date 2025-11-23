@@ -3,65 +3,61 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sindhu Airdrop Tap Game</title>
+<title>Sindhu Airdrop</title>
 
-<!-- CSS FILE -->
 <link rel="stylesheet" href="tap.css">
-
-<!-- Telegram WebApp -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 </head>
 <body>
 
-<!-- 🔔 Scrolling Message -->
+<!-- Animated Background -->
+<div class="animated-bg"></div>
+<div class="particles"></div>
+
+<!-- Scrolling Admin Message -->
 <div class="scroll-msg">
-    <marquee id="scrollingMessage">Loading...</marquee>
+    <marquee id="scrollingMessage">Loading message...</marquee>
 </div>
 
-<!-- 🔥 MAIN CONTAINER -->
-<div class="container">
+<div class="main-container">
 
-    <!-- TITLE -->
     <h2 class="title">🔥 Sindhu Airdrop</h2>
 
-    <!-- STATS BOX -->
-    <div class="stats-box">
-        <div>
-            <p class="label">Total Earnings</p>
-            <p class="value" id="totalCoins">0</p>
+    <!-- Stats -->
+    <div class="stats">
+        <div class="stat-box">
+            <p class="stat-title">Total Earnings</p>
+            <p class="stat-value" id="totalCoins">0</p>
         </div>
-        <div>
-            <p class="label">Today Earnings</p>
-            <p class="value" id="todayCoins">0</p>
+
+        <div class="stat-box">
+            <p class="stat-title">Today</p>
+            <p class="stat-value" id="todayCoins">0</p>
         </div>
     </div>
 
-    <!-- LOGO TAP BUTTON -->
-    <div class="logo-wrapper">
-        <img src="logo.png" class="logo" id="tapButton">
+    <!-- Coin Tap -->
+    <div class="coin-container">
+        <img src="logo.png" class="coin" id="tapButton">
+        <div class="glow-ring"></div>
     </div>
 
-    <!-- TAP TEXT -->
     <p class="tap-text">Tap the logo to earn coins!</p>
 
-    <!-- ACTION BUTTONS -->
-    <div class="footer-buttons">
+    <!-- Buttons -->
+    <div class="buttons">
         <a class="btn" id="buyBtn">💰 Buy Sindhu Coin</a>
         <a class="btn" id="priceBtn">📈 Live Price Chart</a>
     </div>
 
 </div>
 
-<!-- FOOTER -->
 <footer>
-    <p>🌐 <a href="https://sindhucoin.in.net" target="_blank" style="color:#fff;">sindhucoin.in.net</a></p>
+    <p>🌐 <a href="https://sindhucoin.in.net" target="_blank">sindhucoin.in.net</a></p>
 </footer>
 
-<!-- SOUND -->
 <audio id="tapSound" src="tap.mp3"></audio>
-
-<!-- JS -->
 <script src="tap.js"></script>
 
 </body>
