@@ -1,83 +1,73 @@
-// Load Stats
-fetch("/admin/api/stats")
-    .then(res => res.json())
-    .then(data => {
-        document.getElementById("totalUsers").innerText = data.users || 0;
-        document.getElementById("totalEarnings").innerText = (data.tokens || 0) + " 🪙";
-        document.getElementById("totalRefs").innerText = data.referrals || 0;
-    });
+// Load stats
+async function loadStats() {
+    const res = await fetch("/admin/api/stats");
+    const s = await res.json();
 
-// Load Users
-fetch("/admin/users")
-    .then(res => res.json())
-    .then(users => {
-        const tbody = document.querySelector("#userTable tbody");
-        tbody.innerHTML = "";
+    document.getElementById("statUsers").textContent = s.users || 0;
+    document.getElementById("statCoins").textContent = s.tokens || 0;
+    document.getElementById("statRefs").textContent = s.referrals || 0;
+}
 
-        users.forEach(u => {
-            const row = document.createElement("tr");
+// Load users
+async function loadUsers() {
+    const res = await fetch("/admin/users");
+    const users = await res.json();
+    const table = document.querySelector("#usersTable tbody");
 
-            row.innerHTML = `
+    table.innerHTML = "";
+
+    users.forEach(u => {
+        let row = `
+            <tr>
                 <td>${u.id}</td>
-                <td>${u.wallet || '-'}</td>
+                <td>${u.wallet || "-"}</td>
                 <td>${u.coins}</td>
                 <td>${u.total_referrals}</td>
                 <td>${u.joined_date}</td>
-            `;
-
-            tbody.appendChild(row);
-        });
-    });
-
-// Search Filter
-function filterUsers() {
-    const input = document.getElementById("searchBox").value.toLowerCase();
-    const rows = document.querySelectorAll("#userTable tbody tr");
-
-    rows.forEach(r => {
-        const rowText = r.innerText.toLowerCase();
-        r.style.display = rowText.includes(input) ? "" : "none";
+            </tr>
+        `;
+        table.innerHTML += row;
     });
 }
 
-// Save Scrolling Message
-function saveMsg() {
-    const msg = document.getElementById("scrollMsg").value;
+// Load scrolling message
+async function loadScrollMessage() {
+    const res = await fetch("/admin/message");
+    document.getElementById("scrollMsg").value = await res.text();
+}
 
-    fetch("/admin/message", {
+// Save scrolling message
+document.getElementById("saveScroll").onclick = async () => {
+    const message = document.getElementById("scrollMsg").value;
+    await fetch("/admin/message", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: "message=" + encodeURIComponent(msg)
-    }).then(() => alert("Message Saved!"));
-}
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: `message=${encodeURIComponent(message)}`
+    });
+    alert("Saved!");
+};
 
-// Download CSV
-function downloadCSV() {
+// CSV Export
+document.getElementById("csvBtn").onclick = () => {
     window.location.href = "/admin/report";
-}
+};
 
-// Send message to ALL users
-function sendBroadcast() {
-    const msg = document.getElementById("broadcastBox").value.trim();
-    const status = document.getElementById("broadcastStatus");
+// Broadcast
+document.getElementById("sendBroadcast").onclick = async () => {
+    const text = document.getElementById("broadcast").value;
+    if (!text) return alert("Enter message!");
 
-    if (!msg) {
-        alert("Message cannot be empty!");
-        return;
-    }
-
-    status.innerText = "Sending...";
-
-    fetch("/admin/broadcast", {
+    const res = await fetch("/admin/broadcast", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: msg })
-    })
-    .then(res => res.text())
-    .then(response => {
-        status.innerText = response;
-    })
-    .catch(() => {
-        status.innerText = "❌ Error sending messages.";
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ message: text })
     });
-}
+
+    const reply = await res.text();
+    document.getElementById("broadcastStatus").innerText = reply;
+};
+
+// Init
+loadStats();
+loadUsers();
+loadScrollMessage();
