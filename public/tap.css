@@ -1,10 +1,17 @@
 body {
+    background: #000;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    text-align: center;
     margin: 0;
     padding: 0;
-    background: #000;
-    font-family: Arial, sans-serif;
-    color: white;
-    text-align: center;
+}
+
+.scroll-msg {
+    background: #ffcc00;
+    color: #000;
+    padding: 5px;
+    font-weight: bold;
 }
 
 .container {
@@ -13,84 +20,83 @@ body {
 
 .title {
     font-size: 26px;
-    font-weight: bold;
-    margin-top: 10px;
+    margin-bottom: 20px;
 }
 
-.total-box, .today-box {
-    background: rgba(255,255,255,0.08);
-    backdrop-filter: blur(10px);
-    padding: 10px 15px;
-    margin: 10px auto;
-    width: 80%;
+/* Earnings Box */
+.stats-box {
+    background: #111;
+    border: 2px solid #ffcc00;
     border-radius: 14px;
-    font-size: 18px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
 }
 
-.coin-btn {
-    background: none;
-    border: none;
+.label {
+    font-size: 14px;
+    color: #bbb;
+}
+
+.value {
+    font-size: 22px;
+    font-weight: bold;
+    color: #fff;
+}
+
+/* Logo animation */
+.logo-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 25px 0;
+}
+
+.logo {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    animation: pulse 1.3s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+
+.tap-text {
+    color: #ffcc00;
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+/* Footer Buttons */
+.footer-buttons {
     margin-top: 20px;
 }
 
-.coin-logo {
-    width: 200px;
-    animation: glow 2s infinite ease-in-out;
-}
-
-@keyframes glow {
-    0% { filter: drop-shadow(0 0 5px gold); }
-    50% { filter: drop-shadow(0 0 20px gold); }
-    100% { filter: drop-shadow(0 0 5px gold); }
-}
-
-/* Price box */
-.price-box {
-    background: rgba(255,255,255,0.08);
-    padding: 15px;
-    border-radius: 16px;
-    width: 85%;
-    margin: 20px auto;
-    backdrop-filter: blur(12px);
-}
-
-.price-title {
-    font-size: 20px;
-    font-weight: bold;
-}
-
-#livePrice {
-    font-size: 22px;
-    margin: 10px 0;
-}
-
-.buy-btn {
+.btn {
     display: block;
-    margin-top: 12px;
-    padding: 10px;
-    background: #00cc66;
-    color: #fff;
-    text-decoration: none;
+    margin: 10px auto;
+    padding: 12px;
+    width: 80%;
+    background: #ffcc00;
+    color: #000;
     font-weight: bold;
-    border-radius: 10px;
-}
-
-.buy-btn:hover {
-    background: #00aa55;
-}
-
-/* FOOTER */
-.footer {
-    margin-top: 25px;
-    opacity: 0.7;
-}
-
-.footer a {
-    color: #ccc;
+    border-radius: 12px;
     text-decoration: none;
+    font-size: 16px;
 }
 
-canvas {
-    margin-top: 10px;
-    height: 60px !important;
+/* Footer */
+footer {
+    margin-top: 20px;
+    padding: 10px;
+    background: #111;
+}
+
+footer a {
+    color: #ffcc00;
+    text-decoration: none;
 }
