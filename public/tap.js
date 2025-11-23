@@ -1,13 +1,17 @@
+// Telegram WebApp API
 const tg = window.Telegram.WebApp;
 tg.expand();
 
+// Elements
 const tapButton = document.getElementById("tapButton");
-const totalCoinsElement = document.getElementById("totalCoins");
-const todayCoinsElement = document.getElementById("todayCoins");
+const totalCoinsEl = document.getElementById("totalCoins");
+const todayCoinsEl = document.getElementById("todayCoins");
+const scrollingMessage = document.getElementById("scrollingMessage");
 const tapSound = document.getElementById("tapSound");
-let soundEnabled = false;
 
-document.addEventListener("click", () => soundEnabled = true, { once: true });
+// Unlock sound on first touch
+let soundEnabled = false;
+document.body.addEventListener("click", () => soundEnabled = true, { once: true });
 
 function playSound() {
     if (!soundEnabled) return;
@@ -15,48 +19,66 @@ function playSound() {
     tapSound.play().catch(() => {});
 }
 
-/* Load initial values */
+/* ----------------------------
+   LOAD INITIAL USER STATS
+----------------------------- */
 async function loadStats() {
     try {
-        const res = await fetch("/api/user-stats");
-        const data = await res.json();
+        let res = await fetch("/api/user-stats");
+        let data = await res.json();
 
-        totalCoinsElement.textContent = data.total || 0;
-        todayCoinsElement.textContent = data.today || 0;
-
-        if (data.message) {
-            document.getElementById("scrollingMessage").textContent = data.message;
-        }
+        animateNumber(totalCoinsEl, data.total || 0);
+        animateNumber(todayCoinsEl, data.today || 0);
     } catch (e) {
-        console.error("Stats load error:", e);
+        console.log("Stats load error:", e);
     }
 }
 
-loadStats();
+/* ----------------------------
+   LOAD ADMIN SCROLL MESSAGE
+----------------------------- */
+async function loadScrollMessage() {
+    let msg = await fetch("/admin/message").then(r => r.text());
+    scrollingMessage.textContent = msg || "Welcome to Sindhu Airdrop!";
+}
 
-/* Tap handler */
-tapButton.addEventListener("click", async () => {
-    tapButton.classList.add("tapBounce");
-    setTimeout(() => tapButton.classList.remove("tapBounce"), 250);
+/* ----------------------------
+   NUMBER ANIMATION
+----------------------------- */
+function animateNumber(elm, newValue) {
+    let old = parseInt(elm.textContent);
+    let duration = 300;
+    let startTime = performance.now();
 
-    playSound();
+    function update(t) {
+        let progress = Math.min((t - startTime) / duration, 1);
+        elm.textContent = Math.floor(old + (newValue - old) * progress);
 
-    try {
-        const res = await fetch("/api/tap", { method: "POST" });
-        const data = await res.json();
-
-        totalCoinsElement.textContent = data.total;
-        todayCoinsElement.textContent = data.today;
-
-        if (data.limitReached) {
-            tg.showAlert("⚠️ Daily limit 200 reached");
-        }
-    } catch (e) {
-        console.error("Tap error:", e);
+        if (progress < 1) requestAnimationFrame(update);
     }
+    requestAnimationFrame(update);
+}
+
+/* ----------------------------
+   TAP HANDLER
+----------------------------- */
+tapButton.addEventListener("click", () => {
+    playSound();
+    if (navigator.vibrate) navigator.vibrate(40);
+
+    // Pulse animation
+    tapButton.style.transform = "scale(0.9)";
+    setTimeout(() => tapButton.style.transform = "scale(1)", 100);
+
+    tg.sendData(JSON.stringify({ taps: 1 }));
+
+    todayCoinsEl.textContent = parseInt(todayCoinsEl.textContent) + 1;
+    totalCoinsEl.textContent = parseInt(totalCoinsEl.textContent) + 1;
 });
 
-/* Buttons */
+/* ----------------------------
+   NAVIGATION BUTTONS
+----------------------------- */
 document.getElementById("buyBtn").onclick = () => {
     window.open("https://quickswap.exchange", "_blank");
 };
@@ -64,3 +86,9 @@ document.getElementById("buyBtn").onclick = () => {
 document.getElementById("priceBtn").onclick = () => {
     window.open("https://www.geckoterminal.com", "_blank");
 };
+
+/* ----------------------------
+   INIT
+----------------------------- */
+loadStats();
+loadScrollMessage();
