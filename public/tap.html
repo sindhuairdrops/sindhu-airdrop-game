@@ -3,50 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sindhu Airdrop</title>
-
+<title>Sindhu Airdrop Tap Game</title>
 <link rel="stylesheet" href="tap.css">
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-
 </head>
 <body>
 
-<!-- Animated Background -->
-<div class="animated-bg"></div>
-<div class="particles"></div>
-
-<!-- Scrolling Admin Message -->
 <div class="scroll-msg">
-    <marquee id="scrollingMessage">Loading message...</marquee>
+    <marquee id="scrollingMessage">Loading...</marquee>
 </div>
 
-<div class="main-container">
+<div class="container">
 
     <h2 class="title">🔥 Sindhu Airdrop</h2>
 
-    <!-- Stats -->
-    <div class="stats">
-        <div class="stat-box">
-            <p class="stat-title">Total Earnings</p>
-            <p class="stat-value" id="totalCoins">0</p>
+    <div class="stats-box">
+        <div>
+            <p class="label">Total Earnings</p>
+            <p class="value" id="totalCoins">0</p>
         </div>
-
-        <div class="stat-box">
-            <p class="stat-title">Today</p>
-            <p class="stat-value" id="todayCoins">0</p>
+        <div>
+            <p class="label">Today Earnings</p>
+            <p class="value" id="todayCoins">0</p>
         </div>
     </div>
 
-    <!-- Coin Tap -->
-    <div class="coin-container">
-        <img src="logo.png" class="coin" id="tapButton">
-        <div class="glow-ring"></div>
+    <div class="logo-wrapper">
+        <img src="logo.png" class="logo" id="tapButton">
     </div>
 
     <p class="tap-text">Tap the logo to earn coins!</p>
 
-    <!-- Buttons -->
-    <div class="buttons">
+    <div class="footer-buttons">
         <a class="btn" id="buyBtn">💰 Buy Sindhu Coin</a>
         <a class="btn" id="priceBtn">📈 Live Price Chart</a>
     </div>
@@ -58,6 +45,8 @@
 </footer>
 
 <audio id="tapSound" src="tap.mp3"></audio>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="tap.js"></script>
 
 </body>
