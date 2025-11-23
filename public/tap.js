@@ -1,44 +1,63 @@
 const tg = window.Telegram.WebApp;
+
+// Expand WebApp
 tg.expand();
 
-const tapBtn = document.getElementById("tapButton");
-const totalCoins = document.getElementById("totalCoins");
-const todayCoins = document.getElementById("todayCoins");
-const scrollMessage = document.getElementById("scrollingMessage");
+// DOM elements
+const tapButton = document.getElementById("tapButton");
 const tapSound = document.getElementById("tapSound");
 
-let soundEnabled = false;
+const totalCoinsEl = document.getElementById("totalCoins");
+const todayCoinsEl = document.getElementById("todayCoins");
+const scrollMsg = document.getElementById("scrollingMessage");
 
-document.addEventListener("click", () => { soundEnabled = true; }, { once: true });
+// Buy Buttons
+document.getElementById("buyBtn").onclick = () => {
+    tg.openLink("https://sindhucoin.in.net/buy"); // You can change later
+};
 
-function playTap() {
-    if (soundEnabled) tapSound.play().catch(()=>{});
-    if (navigator.vibrate) navigator.vibrate(50);
-}
+document.getElementById("priceBtn").onclick = () => {
+    tg.openLink("https://sindhucoin.in.net/price");
+};
 
-/* FETCH INITIAL DATA */
+// Load user data from server
 async function loadStats() {
-    const userId = tg.initDataUnsafe.user.id;
+    try {
+        const res = await fetch("/api/userstats?id=" + tg.initDataUnsafe.user.id);
+        const data = await res.json();
 
-    const res = await fetch(`/api/user-info/${userId}`);
-    const data = await res.json();
-
-    totalCoins.textContent = data.total || 0;
-    todayCoins.textContent = data.today || 0;
+        totalCoinsEl.innerText = data.total || 0;
+        todayCoinsEl.innerText = data.today || 0;
+    } catch (err) {
+        console.error("Stats load error", err);
+    }
 }
 
-async function loadScrollingMessage() {
-    const res = await fetch("/admin/message");
-    const msg = await res.text();
-    scrollMessage.textContent = msg || "Welcome to Sindhu Airdrop!";
+// Load scrolling message
+async function loadMessage() {
+    try {
+        const res = await fetch("/admin/message");
+        const msg = await res.text();
+        scrollMsg.innerText = msg || "Welcome to Sindhu Airdrop!";
+    } catch {
+        scrollMsg.innerText = "Welcome to Sindhu Airdrop!";
+    }
 }
 
-loadStats();
-loadScrollingMessage();
-
-/* TAP LOGIC */
-tapBtn.addEventListener("click", () => {
-    playTap();
+// Handle Tap
+tapButton.addEventListener("click", () => {
+    tapSound.play();
 
     tg.sendData(JSON.stringify({ taps: 1 }));
+
+    // Update UI instantly
+    let today = parseInt(todayCoinsEl.innerText) + 1;
+    let total = parseInt(totalCoinsEl.innerText) + 1;
+
+    todayCoinsEl.innerText = today;
+    totalCoinsEl.innerText = total;
 });
+
+// Start
+loadStats();
+loadMessage();
