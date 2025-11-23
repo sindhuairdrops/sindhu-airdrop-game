@@ -1,33 +1,59 @@
-const tg = window.Telegram.WebApp;
+let tg = window.Telegram.WebApp;
 tg.expand();
 
-let soundEnabled = false;
-
-document.addEventListener("click", () => soundEnabled = true, { once: true });
-
+// Elements
+const totalCoinsEl = document.getElementById("totalCoins");
+const todayCoinsEl = document.getElementById("todayCoins");
 const tapButton = document.getElementById("tapButton");
-const totalCoins = document.getElementById("totalCoins");
-const todayCoins = document.getElementById("todayCoins");
 const tapSound = document.getElementById("tapSound");
 
-// Load Initial Stats
-fetch("/api/userinfo")
+// Load scrolling message
+fetch("/admin/message")
+  .then(r => r.text())
+  .then(msg => {
+      document.getElementById("scrollingMessage").innerText = msg || "Welcome to Sindhu Airdrop!";
+  });
+
+// Fetch user info on load
+let userId = tg.initDataUnsafe.user?.id;
+
+if (!userId) {
+    alert("Telegram WebApp ID missing!");
+}
+
+function loadUser() {
+    fetch(`/api/userinfo?id=${userId}`)
     .then(res => res.json())
-    .then(data => {
-        totalCoins.textContent = data.total || 0;
-        todayCoins.textContent = data.today || 0;
-        document.getElementById("scrollingMessage").textContent = data.message || "";
+    .then(d => {
+        totalCoinsEl.innerText = d.total || 0;
+        todayCoinsEl.innerText = d.today || 0;
     });
+}
 
-// Tap Action
+loadUser();
+
+// Tap counter
+let tapCount = 1;
+
 tapButton.addEventListener("click", () => {
-    if (soundEnabled) {
-        tapSound.currentTime = 0;
-        tapSound.play().catch(() => {});
-    }
+    tapSound.currentTime = 0;
+    tapSound.play();
 
-    todayCoins.textContent = Number(todayCoins.textContent) + 1;
-    totalCoins.textContent = Number(totalCoins.textContent) + 1;
+    tapCount++;
 
-    tg.sendData(JSON.stringify({ taps: 1 }));
+    // Send to bot
+    tg.sendData(JSON.stringify({
+        taps: 1
+    }));
+
+    loadUser();
 });
+
+// Buttons
+document.getElementById("buyBtn").onclick = () => {
+    tg.openLink("https://sindhucoin.in.net");
+};
+
+document.getElementById("priceBtn").onclick = () => {
+    tg.openLink("https://sindhucoin.in.net");
+};
