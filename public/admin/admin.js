@@ -1,73 +1,122 @@
-// Load stats
-async function loadStats() {
-    const res = await fetch("/admin/api/stats");
-    const s = await res.json();
+const express = require('express');
+const router = express.Router();
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
+const fs = require('fs');
 
-    document.getElementById("statUsers").textContent = s.users || 0;
-    document.getElementById("statCoins").textContent = s.tokens || 0;
-    document.getElementById("statRefs").textContent = s.referrals || 0;
+const db = new sqlite3.Database(path.join(__dirname, "..", "database.sqlite"));
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Jesh@5999R";
+
+// Simple session store
+const sessions = {};
+
+function getSid(req) {
+  const raw = req.headers.cookie || "";
+  const match = raw.match(/sid=([^;]+)/);
+  return match ? match[1] : null;
 }
 
-// Load users
-async function loadUsers() {
-    const res = await fetch("/admin/users");
-    const users = await res.json();
-    const table = document.querySelector("#usersTable tbody");
-
-    table.innerHTML = "";
-
-    users.forEach(u => {
-        let row = `
-            <tr>
-                <td>${u.id}</td>
-                <td>${u.wallet || "-"}</td>
-                <td>${u.coins}</td>
-                <td>${u.total_referrals}</td>
-                <td>${u.joined_date}</td>
-            </tr>
-        `;
-        table.innerHTML += row;
-    });
+function auth(req, res, next) {
+  const sid = getSid(req);
+  if (sid && sessions[sid]) return next();
+  res.redirect("/admin/login");
 }
 
-// Load scrolling message
-async function loadScrollMessage() {
-    const res = await fetch("/admin/message");
-    document.getElementById("scrollMsg").value = await res.text();
-}
+// -------------------------
+// LOGIN PAGE
+// -------------------------
+router.get("/login", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "public", "admin", "login.html"));
+});
 
-// Save scrolling message
-document.getElementById("saveScroll").onclick = async () => {
-    const message = document.getElementById("scrollMsg").value;
-    await fetch("/admin/message", {
-        method: "POST",
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
-        body: `message=${encodeURIComponent(message)}`
-    });
-    alert("Saved!");
-};
+// LOGIN POST
+router.post("/login", express.urlencoded({ extended: true }), (req, res) => {
+  if (req.body.password === ADMIN_PASSWORD) {
+    const sid = Math.random().toString(36).slice(2);
+    sessions[sid] = true;
+    res.setHeader("Set-Cookie", `sid=${sid}; HttpOnly`);
+    return res.redirect("/admin");
+  }
+  res.send("❌ Wrong password");
+});
 
-// CSV Export
-document.getElementById("csvBtn").onclick = () => {
-    window.location.href = "/admin/report";
-};
+// -------------------------
+// ADMIN PANEL
+// -------------------------
+router.get("/", auth, (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "public", "admin", "index.html"));
+});
 
-// Broadcast
-document.getElementById("sendBroadcast").onclick = async () => {
-    const text = document.getElementById("broadcast").value;
-    if (!text) return alert("Enter message!");
+// STATS API
+router.get("/api/stats", auth, (req, res) => {
+  db.get(
+    "SELECT COUNT(*) AS users, SUM(coins) AS tokens, SUM(total_referrals) AS referrals FROM users",
+    (err, row) => res.json(row || {})
+  );
+});
 
-    const res = await fetch("/admin/broadcast", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ message: text })
-    });
+// USER LIST
+router.get("/users", auth, (req, res) => {
+  db.all(
+    "SELECT id, wallet, coins, total_referrals, joined_date FROM users ORDER BY coins DESC",
+    (err, rows) => res.json(rows || [])
+  );
+});
 
-    const reply = await res.text();
-    document.getElementById("broadcastStatus").innerText = reply;
-};
+// SAVE SCROLL MESSAGE
+router.post("/message", auth, express.urlencoded({ extended: true }), (req, res) => {
+  fs.writeFileSync("admin_message.txt", req.body.message || "");
+  res.send("OK");
+});
 
-// Init
-loadStats();
-loadUsers();
-loadScrollMessage();
+// LOAD SCROLL MESSAGE
+router.get("/message", auth, (req, res) => {
+  const msg = fs.existsSync("admin_message.txt")
+    ? fs.readFileSync("admin_message.txt", "utf8")
+    : "";
+  res.send(msg);
+});
+
+// CSV EXPORT
+router.get("/report", auth, (req, res) => {
+  db.all(
+    "SELECT id, wallet, coins, total_referrals, joined_date FROM users",
+    (err, rows) => {
+      if (err) return res.status(500).send("Error");
+
+      let csv = "user_id,wallet,coins,total_referrals,joined_date\n";
+      rows.forEach(u => {
+        csv += `${u.id},${u.wallet || ""},${u.coins},${u.total_referrals},${u.joined_date}\n`;
+      });
+
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", "attachment; filename=sindhu_airdrop_users.csv");
+
+      res.send(csv);
+    }
+  );
+});
+
+// BROADCAST MESSAGE
+router.post("/broadcast", auth, express.json(), (req, res) => {
+  const message = req.body.message;
+  if (!message) return res.send("❌ Message empty");
+
+  db.all("SELECT id FROM users", async (err, rows) => {
+    if (err) return res.send("Error fetching users");
+
+    let count = 0;
+
+    for (const u of rows) {
+      try {
+        await global.bot.sendMessage(u.id, message);
+        count++;
+        await new Promise(r => setTimeout(r, 40)); // Flood control
+      } catch (e) {}
+    }
+
+    res.send(`✅ Message sent to ${count} users`);
+  });
+});
+
+module.exports = router;
