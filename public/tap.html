@@ -4,18 +4,134 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sindhu Airdrop Tap Game</title>
+
 <link rel="stylesheet" href="tap.css">
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background: #000;
+        font-family: "Arial", sans-serif;
+        color: #fff;
+        text-align: center;
+    }
+
+    .scroll-msg {
+        padding: 8px;
+        background: #111;
+        color: #0ff;
+        font-size: 14px;
+        border-bottom: 1px solid #222;
+    }
+
+    .container {
+        padding: 10px;
+    }
+
+    .title {
+        font-size: 26px;
+        font-weight: bold;
+        margin-top: 10px;
+        color: #f5b642;
+    }
+
+    .stats-box {
+        margin: 15px auto;
+        width: 90%;
+        display: flex;
+        justify-content: space-around;
+        padding: 10px;
+        background: #111;
+        border-radius: 12px;
+        border: 1px solid #222;
+    }
+
+    .label {
+        font-size: 14px;
+        color: #999;
+    }
+
+    .value {
+        font-size: 22px;
+        font-weight: bold;
+        color: #0ff;
+    }
+
+    .logo-wrapper {
+        margin-top: 20px;
+    }
+
+    .logo {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        animation: glow 3s infinite alternate;
+        cursor: pointer;
+        transition: transform 0.1s;
+    }
+
+    .logo:active {
+        transform: scale(0.88);
+    }
+
+    @keyframes glow {
+        from { box-shadow: 0 0 10px #00eaff; }
+        to   { box-shadow: 0 0 40px #00eaff; }
+    }
+
+    .tap-text {
+        margin-top: 15px;
+        font-size: 15px;
+        color: #ccc;
+    }
+
+    .footer-buttons {
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .btn {
+        background: #0f62fe;
+        color: #fff;
+        padding: 12px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-size: 16px;
+        font-weight: bold;
+        width: 85%;
+        margin: auto;
+    }
+
+    footer {
+        margin-top: 30px;
+        padding: 15px;
+        color: #888;
+        font-size: 14px;
+    }
+
+    footer a {
+        color: #0ff;
+        text-decoration: none;
+    }
+</style>
+
 </head>
 <body>
 
+<!-- 🔵 SCROLLING MESSAGE -->
 <div class="scroll-msg">
     <marquee id="scrollingMessage">Loading...</marquee>
 </div>
 
 <div class="container">
 
+    <!-- TITLE -->
     <h2 class="title">🔥 Sindhu Airdrop</h2>
 
+    <!-- ⭐ STATS BOX -->
     <div class="stats-box">
         <div>
             <p class="label">Total Earnings</p>
@@ -27,12 +143,14 @@
         </div>
     </div>
 
+    <!-- 💠 GLOWING LOGO -->
     <div class="logo-wrapper">
         <img src="logo.png" class="logo" id="tapButton">
     </div>
 
     <p class="tap-text">Tap the logo to earn coins!</p>
 
+    <!-- BUTTONS -->
     <div class="footer-buttons">
         <a class="btn" id="buyBtn">💰 Buy Sindhu Coin</a>
         <a class="btn" id="priceBtn">📈 Live Price Chart</a>
@@ -40,10 +158,12 @@
 
 </div>
 
+<!-- FOOTER -->
 <footer>
-    <p>🌐 <a href="https://sindhucoin.in.net" target="_blank">sindhucoin.in.net</a></p>
+    🌐 <a href="https://sindhucoin.in.net" target="_blank">sindhucoin.in.net</a>
 </footer>
 
+<!-- SOUND -->
 <audio id="tapSound" src="tap.mp3"></audio>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
