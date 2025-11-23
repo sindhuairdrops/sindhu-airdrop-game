@@ -1,107 +1,159 @@
+/* =============== GLOBAL =============== */
 body {
     margin: 0;
     padding: 0;
-    background: radial-gradient(circle at top, #0a0a0a, #000000);
-    font-family: 'Segoe UI', sans-serif;
-    color: white;
+    font-family: Arial, sans-serif;
+    background: #000;
+    color: #fff;
     text-align: center;
+    overflow-x: hidden;
 }
 
+/* =============== ANIMATED BACKGROUND =============== */
+.animated-bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(130deg, #5500ff, #220044, #8800ff);
+    background-size: 400% 400%;
+    animation: bgMove 12s ease infinite;
+    z-index: -2;
+}
+
+@keyframes bgMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Floating particles */
+.particles {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-image:
+        radial-gradient(circle, rgba(255,255,255,0.1) 2px, transparent 2px);
+    background-size: 40px 40px;
+    animation: particlesMove 10s linear infinite;
+}
+
+@keyframes particlesMove {
+    from { transform: translateY(0); }
+    to { transform: translateY(-100px); }
+}
+
+/* =============== HEADER SCROLL =============== */
 .scroll-msg {
-    background: #111;
+    background: rgba(255, 255, 255, 0.1);
     padding: 6px;
     font-size: 14px;
-    color: #ffcc00;
-    border-bottom: 1px solid #222;
+}
+
+/* =============== MAIN CONTAINER =============== */
+.main-container {
+    margin-top: 20px;
 }
 
 .title {
-    margin-top: 15px;
     font-size: 26px;
     font-weight: bold;
+    margin-bottom: 15px;
 }
 
-.stats-box {
-    margin: 20px auto;
-    width: 85%;
-    padding: 12px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 12px;
+/* =============== STATS =============== */
+.stats {
     display: flex;
-    justify-content: space-between;
-    text-align: left;
+    justify-content: space-around;
+    margin: 15px 0;
 }
 
-.label {
-    font-size: 12px;
-    opacity: 0.7;
+.stat-box {
+    padding: 10px 15px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    width: 40%;
 }
 
-.value {
-    font-size: 22px;
-    font-weight: bold;
-    margin-top: 4px;
-}
-
-.logo-wrapper {
-    margin-top: 20px;
-}
-
-.logo {
-    width: 210px;
-    height: 210px;
-    border-radius: 50%;
-    cursor: pointer;
-    animation: glowPulse 3s infinite ease-in-out;
-}
-
-/* Glow Animation */
-@keyframes glowPulse {
-    0% { box-shadow: 0 0 8px 2px #d1a84a; }
-    50% { box-shadow: 0 0 28px 10px #ffdd66; }
-    100% { box-shadow: 0 0 8px 2px #d1a84a; }
-}
-
-/* Bounce when tapped */
-.logo.tapBounce {
-    animation: tapBounce 0.25s ease-out;
-}
-
-@keyframes tapBounce {
-    0% { transform: scale(1); }
-    40% { transform: scale(0.85); }
-    100% { transform: scale(1); }
-}
-
-.tap-text {
-    margin-top: 20px;
-    font-size: 16px;
+.stat-title {
+    font-size: 14px;
     opacity: 0.8;
 }
 
-.footer-buttons {
+.stat-value {
+    font-size: 22px;
+    margin-top: 5px;
+    font-weight: bold;
+}
+
+/* =============== TAP COIN =============== */
+.coin-container {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: auto;
+}
+
+.coin {
+    width: 180px;
+    cursor: pointer;
+    animation: coinFloat 3s ease-in-out infinite;
+}
+
+@keyframes coinFloat {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+/* Glow ring */
+.glow-ring {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    width: 120px;
+    height: 25px;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, rgba(255,0,200,0.6), transparent 70%);
+    filter: blur(10px);
+    animation: pulseGlow 2s infinite;
+}
+
+@keyframes pulseGlow {
+    0%,100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+}
+
+.tap-text {
+    margin-top: 12px;
+    font-size: 16px;
+}
+
+/* =============== BUTTONS =============== */
+.buttons {
     margin-top: 25px;
 }
 
 .btn {
     display: block;
-    width: 70%;
     margin: 10px auto;
-    padding: 12px;
-    font-size: 16px;
-    background: #222;
-    border: 1px solid #444;
+    padding: 10px 18px;
+    background: rgba(255,255,255,0.15);
     border-radius: 10px;
-    color: white;
+    width: 70%;
+    color: #fff;
     text-decoration: none;
+    font-size: 16px;
+    backdrop-filter: blur(5px);
 }
 
-.btn:hover {
-    background: #333;
-}
-
+/* =============== FOOTER =============== */
 footer {
-    margin-top: 30px;
+    margin-top: 20px;
+    padding: 10px;
     font-size: 14px;
-    opacity: 0.6;
+}
+
+footer a {
+    color: #ff66ff;
+    text-decoration: none;
 }
