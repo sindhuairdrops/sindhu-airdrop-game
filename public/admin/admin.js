@@ -22,14 +22,16 @@ function auth(req, res, next) {
   res.redirect("/admin/login");
 }
 
-// -------------------------
+// ============================
 // LOGIN PAGE
-// -------------------------
+// ============================
 router.get("/login", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "admin", "login.html"));
 });
 
+// ============================
 // LOGIN POST
+// ============================
 router.post("/login", express.urlencoded({ extended: true }), (req, res) => {
   if (req.body.password === ADMIN_PASSWORD) {
     const sid = Math.random().toString(36).slice(2);
@@ -40,14 +42,16 @@ router.post("/login", express.urlencoded({ extended: true }), (req, res) => {
   res.send("❌ Wrong password");
 });
 
-// -------------------------
-// ADMIN PANEL
-// -------------------------
+// ============================
+// ADMIN DASHBOARD
+// ============================
 router.get("/", auth, (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "admin", "index.html"));
 });
 
-// STATS API
+// ============================
+// API: STATS
+// ============================
 router.get("/api/stats", auth, (req, res) => {
   db.get(
     "SELECT COUNT(*) AS users, SUM(coins) AS tokens, SUM(total_referrals) AS referrals FROM users",
@@ -55,7 +59,9 @@ router.get("/api/stats", auth, (req, res) => {
   );
 });
 
-// USER LIST
+// ============================
+// API: USER LIST
+// ============================
 router.get("/users", auth, (req, res) => {
   db.all(
     "SELECT id, wallet, coins, total_referrals, joined_date FROM users ORDER BY coins DESC",
@@ -63,13 +69,15 @@ router.get("/users", auth, (req, res) => {
   );
 });
 
-// SAVE SCROLL MESSAGE
+// ============================
+// SAVE SCROLLING MESSAGE
+// ============================
 router.post("/message", auth, express.urlencoded({ extended: true }), (req, res) => {
   fs.writeFileSync("admin_message.txt", req.body.message || "");
   res.send("OK");
 });
 
-// LOAD SCROLL MESSAGE
+// LOAD SCROLLING MESSAGE
 router.get("/message", auth, (req, res) => {
   const msg = fs.existsSync("admin_message.txt")
     ? fs.readFileSync("admin_message.txt", "utf8")
@@ -77,7 +85,9 @@ router.get("/message", auth, (req, res) => {
   res.send(msg);
 });
 
-// CSV EXPORT
+// ============================
+// EXPORT CSV REPORT
+// ============================
 router.get("/report", auth, (req, res) => {
   db.all(
     "SELECT id, wallet, coins, total_referrals, joined_date FROM users",
@@ -97,7 +107,9 @@ router.get("/report", auth, (req, res) => {
   );
 });
 
-// BROADCAST MESSAGE
+// ============================
+// BROADCAST MESSAGE TO USERS
+// ============================
 router.post("/broadcast", auth, express.json(), (req, res) => {
   const message = req.body.message;
   if (!message) return res.send("❌ Message empty");
