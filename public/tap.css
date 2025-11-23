@@ -1,118 +1,105 @@
+/* Global */
 body {
     margin: 0;
     padding: 0;
-    background: #000;
-    font-family: "Arial", sans-serif;
+    font-family: "Poppins", sans-serif;
+    background: #0a0a0a;
     color: #fff;
     text-align: center;
 }
 
-/* Scrolling Message */
+/* Scrolling text */
 .scroll-msg {
-    padding: 8px;
     background: #111;
-    color: #0ff;
+    padding: 8px 0;
     font-size: 14px;
+    color: #ffcc00;
     border-bottom: 1px solid #222;
 }
 
 /* Container */
 .container {
-    padding: 15px;
+    padding: 20px;
 }
 
 /* Title */
 .title {
-    font-size: 28px;
+    font-size: 26px;
     font-weight: bold;
-    margin-top: 10px;
-    color: #f5b642;
+    margin-bottom: 20px;
 }
 
 /* Stats Box */
 .stats-box {
-    margin: 15px auto;
-    width: 90%;
-    display: flex;
-    justify-content: space-around;
-    padding: 13px;
     background: #111;
+    border: 1px solid #333;
     border-radius: 12px;
-    border: 1px solid #222;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
 }
 
-.label {
+.stats-box .label {
+    font-size: 12px;
+    color: #bbb;
+}
+
+.stats-box .value {
+    font-size: 20px;
+    font-weight: bold;
+    color: #00ffea;
+}
+
+/* Logo Wrapper */
+.logo-wrapper {
+    margin: 25px auto;
+}
+
+.logo {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    animation: pulse 2s infinite ease-in-out;
+    cursor: pointer;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 15px #00ffee; }
+    50% { transform: scale(1.1); box-shadow: 0 0 30px #00ffee; }
+    100% { transform: scale(1); box-shadow: 0 0 15px #00ffee; }
+}
+
+/* Tap text */
+.tap-text {
+    margin-top: 10px;
     font-size: 14px;
     color: #aaa;
 }
 
-.value {
-    font-size: 24px;
-    font-weight: bold;
-    color: #00eaff;
-}
-
-/* Logo */
-.logo-wrapper {
-    margin-top: 20px;
-}
-
-.logo {
-    width: 180px;
-    height: 180px;
-    border-radius: 50%;
-    animation: glow 3s infinite alternate;
-    cursor: pointer;
-    transition: transform 0.1s;
-}
-
-.logo:active {
-    transform: scale(0.87);
-}
-
-/* Glowing Animation */
-@keyframes glow {
-    from { box-shadow: 0 0 10px #00eaff; }
-    to   { box-shadow: 0 0 45px #00eaff; }
-}
-
-/* Tap Text */
-.tap-text {
-    margin-top: 15px;
-    font-size: 15px;
-    color: #ccc;
-}
-
 /* Buttons */
-.footer-buttons {
-    margin-top: 25px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+.footer-buttons .btn {
+    display: block;
+    background: #00c8ff;
+    padding: 12px;
+    margin: 12px 0;
+    border-radius: 8px;
+    color: #000;
+    font-weight: bold;
+    text-decoration: none;
 }
 
-.btn {
-    background: #0f62fe;
-    color: #fff;
-    padding: 13px;
-    border-radius: 10px;
-    text-decoration: none;
-    font-size: 16px;
-    font-weight: bold;
-    width: 85%;
-    margin: auto;
-    display: block;
+.btn:hover {
+    opacity: 0.85;
 }
 
 /* Footer */
 footer {
-    margin-top: 35px;
-    padding: 15px;
-    color: #888;
+    margin-top: 20px;
     font-size: 14px;
 }
 
 footer a {
-    color: #0ff;
+    color: #00ffee;
     text-decoration: none;
 }
