@@ -1,50 +1,46 @@
 body {
     margin: 0;
     padding: 0;
-    background: #000;
-    color: #fff;
-    font-family: Arial, sans-serif;
+    background: radial-gradient(circle at top, #0a0a0a, #000000);
+    font-family: 'Segoe UI', sans-serif;
+    color: white;
     text-align: center;
 }
 
 .scroll-msg {
-    background: rgba(255, 215, 0, 0.2);
-    color: gold;
+    background: #111;
     padding: 6px;
-    font-size: 15px;
-    border-bottom: 1px solid gold;
-}
-
-.container {
-    padding: 20px;
+    font-size: 14px;
+    color: #ffcc00;
+    border-bottom: 1px solid #222;
 }
 
 .title {
+    margin-top: 15px;
     font-size: 26px;
     font-weight: bold;
-    color: #ffcc33;
-    margin-bottom: 15px;
 }
 
 .stats-box {
-    display: flex;
-    justify-content: space-around;
-    background: rgba(255, 255, 255, 0.1);
+    margin: 20px auto;
+    width: 85%;
     padding: 12px;
-    border-radius: 10px;
-    margin-bottom: 20px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    text-align: left;
 }
 
 .label {
-    font-size: 14px;
-    opacity: 0.8;
+    font-size: 12px;
+    opacity: 0.7;
 }
 
 .value {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: bold;
-    margin-top: 5px;
-    color: #ffd700;
+    margin-top: 4px;
 }
 
 .logo-wrapper {
@@ -52,19 +48,33 @@ body {
 }
 
 .logo {
-    width: 160px;
-    height: 160px;
-    border-radius: 20px;
-    animation: glow 2s infinite alternate;
+    width: 210px;
+    height: 210px;
+    border-radius: 50%;
+    cursor: pointer;
+    animation: glowPulse 3s infinite ease-in-out;
 }
 
-@keyframes glow {
-    from { box-shadow: 0 0 10px gold; }
-    to { box-shadow: 0 0 35px gold; }
+/* Glow Animation */
+@keyframes glowPulse {
+    0% { box-shadow: 0 0 8px 2px #d1a84a; }
+    50% { box-shadow: 0 0 28px 10px #ffdd66; }
+    100% { box-shadow: 0 0 8px 2px #d1a84a; }
+}
+
+/* Bounce when tapped */
+.logo.tapBounce {
+    animation: tapBounce 0.25s ease-out;
+}
+
+@keyframes tapBounce {
+    0% { transform: scale(1); }
+    40% { transform: scale(0.85); }
+    100% { transform: scale(1); }
 }
 
 .tap-text {
-    margin-top: 15px;
+    margin-top: 20px;
     font-size: 16px;
     opacity: 0.8;
 }
@@ -75,17 +85,23 @@ body {
 
 .btn {
     display: block;
+    width: 70%;
     margin: 10px auto;
-    padding: 12px 20px;
-    width: 80%;
-    background: gold;
-    color: black;
-    font-weight: bold;
+    padding: 12px;
+    font-size: 16px;
+    background: #222;
+    border: 1px solid #444;
     border-radius: 10px;
+    color: white;
     text-decoration: none;
+}
+
+.btn:hover {
+    background: #333;
 }
 
 footer {
     margin-top: 30px;
-    opacity: 0.7;
+    font-size: 14px;
+    opacity: 0.6;
 }
