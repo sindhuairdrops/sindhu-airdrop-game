@@ -1,59 +1,66 @@
-let tg = window.Telegram.WebApp;
+const tg = window.Telegram.WebApp;
 tg.expand();
 
-// Elements
-const totalCoinsEl = document.getElementById("totalCoins");
-const todayCoinsEl = document.getElementById("todayCoins");
 const tapButton = document.getElementById("tapButton");
+const totalCoinsElement = document.getElementById("totalCoins");
+const todayCoinsElement = document.getElementById("todayCoins");
 const tapSound = document.getElementById("tapSound");
+let soundEnabled = false;
 
-// Load scrolling message
-fetch("/admin/message")
-  .then(r => r.text())
-  .then(msg => {
-      document.getElementById("scrollingMessage").innerText = msg || "Welcome to Sindhu Airdrop!";
-  });
+document.addEventListener("click", () => soundEnabled = true, { once: true });
 
-// Fetch user info on load
-let userId = tg.initDataUnsafe.user?.id;
-
-if (!userId) {
-    alert("Telegram WebApp ID missing!");
-}
-
-function loadUser() {
-    fetch(`/api/userinfo?id=${userId}`)
-    .then(res => res.json())
-    .then(d => {
-        totalCoinsEl.innerText = d.total || 0;
-        todayCoinsEl.innerText = d.today || 0;
-    });
-}
-
-loadUser();
-
-// Tap counter
-let tapCount = 1;
-
-tapButton.addEventListener("click", () => {
+function playSound() {
+    if (!soundEnabled) return;
     tapSound.currentTime = 0;
-    tapSound.play();
+    tapSound.play().catch(() => {});
+}
 
-    tapCount++;
+/* Load initial values */
+async function loadStats() {
+    try {
+        const res = await fetch("/api/user-stats");
+        const data = await res.json();
 
-    // Send to bot
-    tg.sendData(JSON.stringify({
-        taps: 1
-    }));
+        totalCoinsElement.textContent = data.total || 0;
+        todayCoinsElement.textContent = data.today || 0;
 
-    loadUser();
+        if (data.message) {
+            document.getElementById("scrollingMessage").textContent = data.message;
+        }
+    } catch (e) {
+        console.error("Stats load error:", e);
+    }
+}
+
+loadStats();
+
+/* Tap handler */
+tapButton.addEventListener("click", async () => {
+    tapButton.classList.add("tapBounce");
+    setTimeout(() => tapButton.classList.remove("tapBounce"), 250);
+
+    playSound();
+
+    try {
+        const res = await fetch("/api/tap", { method: "POST" });
+        const data = await res.json();
+
+        totalCoinsElement.textContent = data.total;
+        todayCoinsElement.textContent = data.today;
+
+        if (data.limitReached) {
+            tg.showAlert("⚠️ Daily limit 200 reached");
+        }
+    } catch (e) {
+        console.error("Tap error:", e);
+    }
 });
 
-// Buttons
+/* Buttons */
 document.getElementById("buyBtn").onclick = () => {
-    tg.openLink("https://sindhucoin.in.net");
+    window.open("https://quickswap.exchange", "_blank");
 };
 
 document.getElementById("priceBtn").onclick = () => {
-    tg.openLink("https://sindhucoin.in.net");
+    window.open("https://www.geckoterminal.com", "_blank");
 };
