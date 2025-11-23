@@ -1,17 +1,18 @@
 body {
     margin: 0;
     padding: 0;
+    background: #000;
+    color: #fff;
     font-family: Arial, sans-serif;
-    background: black;
-    color: white;
     text-align: center;
 }
 
 .scroll-msg {
-    background: #111;
-    padding: 5px;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #333;
+    background: rgba(255, 215, 0, 0.2);
+    color: gold;
+    padding: 6px;
+    font-size: 15px;
+    border-bottom: 1px solid gold;
 }
 
 .container {
@@ -19,52 +20,53 @@ body {
 }
 
 .title {
-    font-size: 28px;
+    font-size: 26px;
     font-weight: bold;
     color: #ffcc33;
-    margin-top: 10px;
+    margin-bottom: 15px;
 }
 
 .stats-box {
     display: flex;
     justify-content: space-around;
-    margin: 20px 0;
+    background: rgba(255, 255, 255, 0.1);
     padding: 12px;
-    background: #111;
-    border-radius: 12px;
+    border-radius: 10px;
+    margin-bottom: 20px;
 }
 
 .label {
-    font-size: 12px;
-    color: #ccc;
+    font-size: 14px;
+    opacity: 0.8;
 }
 
 .value {
     font-size: 20px;
     font-weight: bold;
-    color: #ffcc33;
+    margin-top: 5px;
+    color: #ffd700;
 }
 
 .logo-wrapper {
-    margin: 15px 0;
+    margin-top: 20px;
 }
 
 .logo {
-    width: 220px;
-    height: 220px;
+    width: 160px;
+    height: 160px;
     border-radius: 20px;
-    box-shadow: 0 0 40px gold;
-    cursor: pointer;
-    transition: transform .1s ease-in-out;
+    animation: glow 2s infinite alternate;
 }
 
-.logo:active {
-    transform: scale(0.92);
+@keyframes glow {
+    from { box-shadow: 0 0 10px gold; }
+    to { box-shadow: 0 0 35px gold; }
 }
 
 .tap-text {
-    margin-top: 10px;
+    margin-top: 15px;
     font-size: 16px;
+    opacity: 0.8;
 }
 
 .footer-buttons {
@@ -73,18 +75,17 @@ body {
 
 .btn {
     display: block;
-    background: #222;
-    padding: 12px;
-    margin: 8px auto;
-    width: 220px;
-    border-radius: 10px;
-    color: gold;
-    text-decoration: none;
+    margin: 10px auto;
+    padding: 12px 20px;
+    width: 80%;
+    background: gold;
+    color: black;
     font-weight: bold;
+    border-radius: 10px;
+    text-decoration: none;
 }
 
 footer {
-    margin-top: 25px;
-    padding-bottom: 20px;
-    color: #777;
+    margin-top: 30px;
+    opacity: 0.7;
 }
